@@ -1,0 +1,1536 @@
+
+```{r 'check_ps', include=FALSE}
+
+user.name = ''
+```
+
+
+## Strategies to Promote Energy Efficient Technologies in  Low-Income Households - An Interactive Analysis with R
+
+
+
+Author: Janna Eisenhut
+
+***
+
+
+
+
+Hello, and welcome to my RTutor problem set. This is an interactive analysis in `R`, and I would be happy to guide you through my problem set. The data and analysis are based on the paper **"Credit, Attention, and Externalities in the Adoption of Energy Efficient Technologies by Low-Income Households"** written by the researchers Susanna B. Berkouwer and Joshua T. Dean. The article was published in October 2022 in the American Economic Review. 
+The article and the data can be found at the following link: https://www.aeaweb.org/articles?id=10.1257/aer.20210766.
+
+The paper examines how the low-income population can be encouraged to invest in energy-efficient technologies by employing an experiment in Kenya. In this experiment, an old cooker could be replaced by a more efficient model called Jikokoa, which consumes less coal. This energy-efficient cooker delivers triple dividends. It reduces not only the cost of coal but also CO2 emissions as well as cooking time. Potential consumers often do not invest in environmental health technologies because they are unaware about or don't value the benefits of the technology. In addition, consumers are unwilling to finance or cannot pay the prevailing prices for the technologies (Lewis & Pattanayak, 2012).
+Due to the lack of demand despite the benefits of improved cook stoves, some developing countries have introduced national cook stove initiatives to deploy efficient cook stoves to households using traditional ones (Venkataraman et al., 2010; Urmee & Gymfi, 2014).
+As part of the investigation, the researchers tried different strategies, such as extensive education about the benefits and costs of the energy-efficient Jikokoa stove as well as access to credit to increase the purchase probability. 
+In the problem set, I will present you the paper's main results by letting you solve different tasks regarding the data analysis. Besides gaining insights into behavioral constraints in lower socioeconomic classes, you get an introduction to basic data analytic skills in `R`. Don't be afraid if you consider an exercise too difficult. There will always be hints on how to solve the task if you get stuck.
+
+The problem set can be found here:
+
+* `GitHub`: <https://github.com/jannaeisenhut/RTutorEnergyEfficience>
+
+* `ShinyApps`: <https://jannaeisenhut.shinyapps.io/Energy-Efficience/>
+
+## Exercise Content
+
+1. Introduction to the Experiment
+
+ 1.1 Motivation
+ 
+ 1.2 Procedure
+ 
+2. Data overview
+
+ 2.1 Introduction to the data set
+ 
+ 2.2 Characteristics of the participants
+ 
+3. Coal costs, willingness to pay and treatment effects
+
+4. Effect of stove adoption on weekly charcoal spending with OLS
+    
+5. Effect of stove adoption on weekly charcoal spending with instrumental variable    regression
+
+6. Additional analysis with two instrumental variables
+    
+7. Effect of credit and attention treatment
+
+8. Conclusion
+ 
+9. References
+
+First, I will introduce you to the experiment and outline the motivation and occasion to conduct this study. Next, we will become familiar with the data sets the researchers created and play with some descriptive data analysis tools to learn more about the participants' characteristics. Afterwards, we will continue by determining the coal costs of the old and new stoves by descriptive analysis and later with different regression forms. With a descriptive approach as well as instrumental variable regression we will analyze if credit and attention are useful treatments to enhance energy-efficient technology adoption. You will learn about practical regression implementations and problems as well as solutions in this context. Finally, I will point out some strategies, especially for politics, to raise energy efficient technologies in private households, which is not only reflected in less expenditure for the individuals but also has a positive climate effect for the entirety.
+
+## Instructions for working on the problem set:
+
+ Work through the problem set step by step for the best learning success. There are different types of tasks that you have to solve in the problem set. Some tasks will require you to write entire lines of code, and some will only require you to fill in the blanks. When code sections are very complicated, they are given to you, and you just have to execute them by pressing `edit` and then `check`. Before you start a task click on `edit`, then it is possible to enter or correct code in a chunk. To execute your code, click on `run chunk` or `check`. The latter option also checks if the code is correct. If you still get stuck, you can click on `hint` to get more information which will help you to solve the task, or you can request the full solution by selecting `solution`. 
+ 
+Furthermore, interspersed quizzes are placed throughout the problem set, where you can check if you understand everything right and deepen the knowledge acquired.
+
+
+<br/>
+
+## Exercise 1 -- Introduction to the experiment
+
+Before we get to the data analysis part, I will give you a short introduction to the topic and the reasons why the researchers conducted the experiment. After that, I will explain the structure of the experiment, which was based on several visits and questionnaires as well as the help of a method called BDM mechanism. This mechanism, named after Gordon M. Becker, Morris H. DeGroot, and Jacob Marschak, was developed in the 1960s and is used in experimental economics to measure the willingness to pay (WTP). It works in the following way. The subject states a price which he is willing to pay for an item that is auctioned. The actual price of the item is generated randomly in this design. If the stated price of the subject is higher than the randomly assigned price, the person has to buy the item. Otherwise, if the random price is higher than the respective WTP, the person does not get the item and thus does not have to pay anything. Hence it is the subject's best interest to state their true WTP. With this procedure an individual's limit price can be measured directly. Also, a demand function can be set up with the stated WTPs of this mechanism (G. Becker, M. Degroot & J. Marschak, 1964).
+The random price distribution leads to a partly random Jikokoa adoption and helps in the statistical analyses to get an unbiased estimate of coal cost reduction as well as the effectiveness of the credit and attention treatment. 
+
+## Exercise 1.1 -- Motivation
+
+
+In times of climate crisis and rising energy costs, investing in energy-efficient technologies is becoming indispensable. These investments are no longer only crucial for the survival of companies but also for private households to lower their energy costs and greenhouse gas emissions at the same time. The problem, especially for low-income households in this context, is that energy-saving investments first require a relatively high installment or product fee before savings can be generated due to the acquired technology. Nevertheless, impoverished people do not have enough cash or savings to pay for these kinds of investments. Buying food and having some money left in case of unpredictable events are more critical for them. The main question Berkouwer and Dean investigate is how to get those low-income households pursued to invest in energy-efficient technologies. Therefore, they conducted an experiment in Kenya with 1000 households in Nairobi. The energy-efficient investment in this experiment is presented by buying a new stove "Jikokoa", instead of using a traditional stove called "jiko", which is used by approximately 42 % of the Kenyan population besides wood stoves and petroleum gas. The purchase cost of this efficient stove amounts to 40 USD. The Jikokoa leads to a reduction in the amount of charcoal, which is needed for cooking, compared to the traditional jiko. Through this charcoal reduction also greenhouse gas savings are generated. On the webpage, the company BURN, which produces the Jikokoa, advertises savings of 180 USD per year and a household return of investment of 296 %. The amount of coal needed for cooking using the Jikokoa is promoted to be only half of what the traditional stove needs.
+
+Both stoves can be bought in a regular supermarket in Kenya.
+
+Here is a picture of the Jikokoa stove compared to the traditional jiko stove: 
+
+![Alt-Text](Jikokoa.jpg "Jikokoa stove")
+![Alt-Text](JIKO-STOVE.jpg "traditional jiko stove")
+
+Even though buying the Jikokoa stove is an opportunity to reduce emissions at negative costs, the researchers found a large underadoption of this energy-efficient technology. This underadoption is also represented by the willingness to pay (WTP), which is in the experiment on average 12$ for a Jikokoa. Because of these circumstances, researchers have investigated two factors that could be responsible for the low adoption rates. Firstly, limited access to financing options could prevent households from making rational decisions. Secondly, individuals may not pay enough attention to the cost-saving possibilities accompanied by these efficient technologies.
+
+
+Quiz: In case of rational behavior, would high-income or low-income households pay more attention to energy costs?
+
+[1]: High-income households.
+[2]: Low-income households.
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("energy cost attention")
+```
+
+In low-income conditions, energy costs represent a larger fraction of the budget available to a household. As you will see in a later section, in our sample it is 22 % of a household's income. The big difference is shown by comparing the fraction to a median American household which needs only 3 % of its income for energy expenses (Drehobl & Ross, 2016). One can conclude that low-income people should pay more attention to energy-saving possibilities and make optimal decisions regarding this kind of expenses.
+However, reality shows a different picture. The adoption of the Jikokoa has so far been mainly occurred in circles of Kenyans that have a higher socioeconomic status. At the beginning of the study in 2018, only 12 % of Jikokoa owners live below the poverty threshold of 3.20 USD per day per person.
+
+
+Quiz: Guess how much of the Kenyan population approximately live below the poverty line of 3.20 US Dollar.
+
+[1]: less than 20 %
+[2]: 30-50 %
+[3]: 60-80 % 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("poverty")
+```
+
+
+This phenomenon of low adoption, especially in lower classes, appears in more sectors than just the Jikokoa case. The International Energy Agency  (2018) estimates that energy efficiency technologies available to households **today** have the potential to save 201 billion USD in avoided fuel and 365 billion USD in transport costs globally per year by 2040 if these are implemented.
+
+
+## Exercise 1.2 -- Procedure
+
+
+The study included 1018 participants from low-income areas of Nairobi. The sole criterion for participating in the study was using a traditional jiko for cooking. 
+The study comprised three visits every 25-30 days (baseline, midline and endline visit) and a long-term endline survey, conducted over the phone one year later. Also, respondents had to complete an SMS survey about their use of charcoal every three days from visit 1 or 2 (90/60 days), depending on group assignment, and collect their charcoal ash between visits 2 and 3. In addition, participants taking credit to finance the acquisition of the Jikokoa, have to pay back their debt with loan payments during three months after visit 2.
+
+In visit 1, participants are enrolled in the experiment and had to fill out an enrollment survey.
+
+To test for reasons of under adoption and possibilities to mitigate this phenomenon, the respondents are randomly assigned to one of three attention and one of three credit treatment groups after visit 1. The latter consists of one credit control group (C0), one group with 12 weekly payment deadlines (C1), and a group with three monthly payment deadlines (C2). Through a modest interest rate for the loan of 1.16 % borrowing costs were kept small compared with 7 % or more demanded by mobile money lenders. Respondents in the credit control group do not get credit for purchasing the Jikokoa. They have to pay for it in cash. 
+
+The different attention groups also consist of three groups. In all groups, respondents get a flyer of the Jikokoa with the information of 50 % less charcoal consumption promised by the manufacturer. The control group A0 only gets this advertisement. A1 must also state their charcoal consumption between visits 1 and 2 via SMS every three days. In addition, they get an attention sheet during visit 2 where they compute their savings for the next year under the assumption of owning the Jikokoa. These savings are then presented to them during the BDM elicitation that also takes place in visit 2.
+In attention group A2, not only the savings but also the costs associated with adopting energy-efficient measures are considered. Respondents are informed of their net benefit (savings minus costs) for each period, including the costs incurred by their assigned credit group.
+Berkouwer and Dean aim to determine if respondents are unresponsive to the savings promised by traditional marketing strategies and would benefit from more education on savings. In interaction with credit groups, it is also examined if moving costs to the future and partitioning it over time makes adoption more attractive.
+
+During visit 2 the BDM mechanism is introduced. Respondents randomly get an envelope with a price between 0.01 USD and 29.99 USD for the Jikokoa. At the same time, the officer asks the participant if he would buy the cooker at different prices between 0 USD and 40 USD. He starts with the question: "Would you buy the Jikokoa for 20 USD?" Depending on the answer, he continues asking for prices higher or lower than 20 USD. When the WTP is stated, the envelope is opened. If the WTP is higher than the random price, the respondent has to buy the Jikokoa for the price in the envelope. Otherwise, if the WTP is lower, the attendant will not be able to purchase a discounted Jikokoa. Let us illustrate it with an example: the random price in the envelope is 20 USD, and the WTP is 25 USD, then the respondent has to buy the stove for 20 USD. If the WTP is only 15 USD, then the respondent will not get the Jikokoa and does not have to pay anything. Introducing a random factor in the experiment has two advantages. Firstly, it is in the best interest of the participants to state their true WTP. The possibility of getting the item shrinks, if the respondent specifies a lower WTP or vice versa, it has to be paid a price higher than the true WTP. Secondly, the adoption of the Jikokoa becomes random, allowing us to estimate the impact of adoption on charcoal spending in later regression analysis.
+
+After visit 2, respondents get in a 60-day period every three days an SMS with the request to state the charcoal use. Only A1 group members state their expenditure for charcoal in SMS since visit 1 and thus over a period of 90 days. Also, the charcoal ash resulting from cooking is collected in a bucket after visit 2. The loan repayment is only due if the participant is in group C1 or C2.
+
+During visit 3 the charcoal bucket is weighed by the officer and the respondents have to fill out an endline survey where they have to indicate their charcoal use again. 
+
+To be able to measure the long-term effects, there was another survey after one year. Here, coal consumption and other data should be specified again. After the long-term endline survey, the charcoal usage is requested once more via SMS every three days over a 60-day period.
+
+
+Below you can find an illustration of the course of the experiment that presents the individual steps clearly. If you are interested in how to create such figures, you can find the `R code` in the related info box. During the problem set, you will become proficient in creating graphs and figures in `R`. Examining the code below is a good starting point and do not worry, you will gradually become familiar with the various expressions.
+
+![Alt-Text](my_plot.png)
+
+
+Please note that "Visit 2" is the point "0" in time.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("R code for the illustration")
+```
+
+Now I will ask a bunch of questions to check if you got everything right. After that, we can finally dive into the data and start analyzing!
+
+
+
+Quiz: After visit 1 starts the SMS charcoal survey for all participants.
+
+[1]: True
+[2]: False 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("SMS survey")
+```
+
+
+Quiz: Every respondent can only be a member of an attention group or a credit group.
+
+[1]: True
+[2]: False 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("treatment goup")
+```
+
+
+Quiz: At what time study participants get their Jikokoa?
+
+[1]: Visit 1
+[2]: Visit 2 
+[3]: After 90 days
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("jikokoa")
+```
+
+
+Quiz: Can every participant buy a Jikokoa within the trial?
+
+[1]: Yes
+[2]: No, it depends on their WTP in conjunction with the random price distribution
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("jikokoa2")
+```
+
+
+In the next step, we will closely examine the data the researchers have obtained in their experiment. 
+
+## Exercise 2 -- Data overview
+
+
+The data generated by the experiment consists of two primary data files. Because the researchers implemented most of their statistical analysis with Stata, the majority of the files are in  **.dta**-format. We will use the data files "SMS_clean_sms_replication.dta" and "Visit123_E1_analysis_replication.dta" throughout the analysis.
+These files you can find with the following link: https://www.openicpsr.org/openicpsr/project/166661/version/V1/view.
+
+I transformed the data set "Visit123_E1_analysis_replication.dta" to a more compact one because it contains much information that will not be used in this problem set. 
+The two exercise chapters will introduce you to the basics of data preparation and manipulation. You will begin by loading various file formats into R and gain an understanding of the corresponding data tables. By the end, you will be able to manipulate the data to answer different research questions.
+
+
+
+## Exercise 2.1 -- Introduction to the data set
+
+
+To import the **.dta**-files into R, we require the R package `haven`, and the corresponding command  `read_dta()`. Packages are loaded using the `library()` function. Now, try your first line of R code by loading the `haven` package. Hint: the name of the package should be placed within the brackets of the `library()` command. If you encounter any difficulties, you can refer back to the previous page where the command was already provided in the information box of the experiment illustration.
+
+**Task 2.1.1**  Start by loading the `haven` package using `library()`.
+
+```{r "6_1"}
+#use library() to load the haven package
+```
+
+The data file "Visit123_E1_analysis_replication.dta" is a huge table with over 1000 columns containing data of all visits and questionnaires. For our analysis, we will only require a subset of these variables. Therefore, I created a data frame consisting of only the necessary variables for this problem set. Thereby we refrain from carrying large amounts of data with us and sustain clarity. The compressed table is stored in the native **.rds** format of R and can be loaded with the `readRDS()` command. The process is similar to the `library()` function described earlier, where you only substitute the data set's name in the parentheses. Additionally, you must store the loaded data in a variable using "=", with the variable name matching the data file name, `dat_main.rds`. Also put the data set in quotes to make the code work.
+
+**Task 2.1.2** Load the data table `dat_main.rds` with `readRDS()` and save the data to the variable `dat_main` .
+
+```{r "6_2"}
+#use readRDS() and put the name of the data set in the brackets and use quotes ""
+```
+
+Great, you loaded a data table into R! Now, we aim to inspect the data to explore the structure and variables established by the researchers. One approach to obtain a preliminary overview is by utilizing the `head()` function. This provides the first six rows of the data set and ensures data clarity. In our scenario, the full data includes one row for each participant, totaling over 1000 rows, which can be daunting to comprehend initially.
+
+**Task 2.1.3** Call `head()` on the data set `dat_main`.
+
+```{r "6_3"}
+#use head() 
+```
+
+As a result, you can observe the first six lines of the data set. The data frame may still create an overwhelming impression due to a large number of variables. But do not worry, I will explain every variable from time to time. 
+After you learned how to load a data set into R, you can try to load the second data set by yourself and save it in the variable `dat_sms`. The second necessary data set is called `SMS_clean_sms_replication.dta` and contains the data of the SMS charcoal survey. As you may notice, now we have to load a file in **.dta** format and hence have to use the `read_dta()` command of the `haven` package. Again use `head()` to display only the first six lines.
+
+**Task 2.1.4**  Load the data set of the SMS charcoal study `SMS_clean_sms_replication.dta` with `read_dta()` and save it to the variable `dat_sms`. Afterwards have a look at the first 6 lines using `head()`.
+
+```{r "6_4"}
+# Enter your code here.
+```
+
+This data set encompasses the SMS-based charcoal usage study of participants in treatment groups A1 and A2, which commences prior to the second visit, and the SMS-based charcoal usage study of all other participants, which begins following the second visit. Let us have a look at the different variables stored in the table.
+`Midline_date` is the respective date of visit 2 and `baseline_date` the respective date of visit 1. `Amount` and `amount_weekly` specifies the money the corresponding respondent spends on charcoal in three days/every week measured in KSH (Kenya shilling). The study adopts a simplified exchange rate of 1 USD to 100 KSH.
+Let us play around a little with the data, so you can learn some basic `R` commands. We want to analyze the highest weekly expenditure for coal, which is documented in the study. 
+We start by extracting only one column of the `data_sms` frame. This can be accomplished by referencing the desired column in the data_sms variable using the `$` symbol followed by the column name.
+
+**Task 2.1.5**  Show the column `amount_weekly` of `dat_sms` and use `head()` to obtain only the first six values of this column.
+
+```{r "6_5"}
+#use a $-sign and the name of the column after the variable name of the data set.
+```
+
+
+To determine the maximum amount of weekly charcoal expenditure recorded in the data set, we can utilize the `max()` function in R. By applying the `max()` function on the desired column, we can determine the maximum value recorded in that column, which in this case represents the highest weekly expenditure for charcoal.
+
+**Task 2.1.6** To determine the maximum of a column, put the expression we build above in the `max()` function (data frame and column name).
+
+```{r "6_6"}
+# Enter your code here.
+```
+
+As you can see the maximum money spend on charcoal in one week is 9333 KSH which is approx. 93 USD and hence quite a lot. Interesting is, whether this participant always purchases such a large amount of coal. To determine the index of the row with the maximum expenditure, we can use the `which.max()` function in R, which returns the index of the maximum value in a given vector. By applying this function to the `amount_weekly` column, we can identify the row with the maximum weekly expenditure for charcoal. After that, we can use this index to extract the complete row from the `data_sms` data frame to obtain further information on the corresponding respondent.
+
+**Task 2.1.7**  The index of a maximum can be derived with `which.max()`. Save the index to the variable `i`. With the index you can display the corresponding row of the maximum. To access a specific entry in a data frame use the following expression `data_frame[row_index, column_index]`, if you leave the column index empty you get the whole row as output and vice versa. Fill in the blanks __ with the correct code.
+
+```{r "6_7"}
+# index of the maximum of amount_weekly
+i=which.max(__)
+
+# take i as row_index to display the whole line of the maximum
+
+dat_sms[_,_]
+```
+
+The output row indicates that the participant with the maximum expenditure is located in column 3 of the data set. Subsequently, we can extract this respondent's ID by utilizing the column index and assign it to a variable named `name`. To obtain the value rather than a data frame, it is necessary to use double brackets.
+
+**Task 2.1.8** Just press `check` to run the line of code.
+
+```{r "6_8"}
+name=dat_sms[[i,3]]
+name
+```
+
+Now, the `respondent_id` of the attendant with the maximum coal cost in one week is saved in the variable `name`. 
+To analyze all weekly coal expenditures of this respondent, we will use the package `dplyr` to simplify the investigation. This is a very powerful package for descriptive analysis and data manipulation. To give you a better overview of the `dplyr` package, I have set up a short info box about it.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("Package dplyr (filter, select, group_by, summarize/summarise, arrange, mutate)")
+```
+
+To see the entire history of coal amount SMS from this specific respondent, we have to use `filter()` and the name of the respondent as condition.
+
+**Task 2.1.9** First, load the `dplyr` package with `library()`, and then filter the data frame `dat_sms` for the `respondent_id` saved in the variable `name`. Just `check` the following line of code.
+
+
+```{r "6_9"}
+library(dplyr)
+filter(dat_sms, respondent_id==name)
+```
+
+From the result, we can observe that the 9333 KSH spending for charcoal was more of a one-time event. It is possible that the participant stockpiled charcoal for subsequent weeks. Additionally, this amount was purchased prior to visit 2 and was likely used with a traditional stove. Out of interest, we can investigate whether the participant bought a Jikokoa during the experiment. To determine if the participant later acquired a Jikokoa stove during the experiment, we can use `dat_main` to see if the **dummy**-variable `jikokoa` is $0$ or $1$ associated with the `respondent_id`. This can be achieved through the use of the `filter()` function, but first, we need to select only the relevant columns using the `select()` function.
+
+**Task 2.1.10**  Fill in the missing parts with the correct code. Use `select()` to select only the columns``respondent_id` and `jikokoa` of the data frame `dat_main` and save it to  fractional data frame `dat_frac`. Afterwards try to set up the `filter()` function on your own orientating at the chunk before. You should filter the fractional data frame for the `respondent_id` saved in `name`. 
+
+```{r "6_10"}
+dat_frac=select(____,respondent_id,______)
+filter(______)
+
+```
+
+We can infer from the output that the person has acquired a Jikokoa during the experiment. A dummy value of $1$ stores a Jikokoa acquisition. In general, this implies that the WTP of the corresponding participant is higher than the allocated random price and hence the respondent adopted the Jikokoa stove.
+
+In the chunk above, the `dplyr` code is written in a "long" form and can be improved to a more compact and intuitive solution. This method is implemented with a `pipe-operator (%>%)`. This operator allows chaining multiple operations and eliminates intermediate variables. It passes the result of an expression into the next function call, concluding that the output does not have to be assigned to a new variable in every line. It is indicated by the character `%>%` at the end of each expression except the last one. I will show you how it works with the example from above. Generally, you can either just show a result table of your instructions or create a new data frame with your `dplyr` code. In the chunk above, we created a new data frame `dat_frac` but only saved the `select()` alteration to it. The `filter`command is just shown in the output table.
+
+**Task 2.1.11**  In this task, do the same as in the task before but only display the output and do not save it into a new data frame. In the end of the first line, we will utilize the `pipe-operator` so that in the second command, we do not have to call the data frame in the first argument. The function will work with the output generated with the piped code before. Press `edit` and `check` to run the code.
+
+```{r "6_11"}
+select(dat_main, respondent_id,jikokoa) %>%
+filter(respondent_id==name)
+```
+
+**Task 2.1.12**  Now create the corresponding `dplyr` code that saves the output in a new data frame `dat_frac`. This is especially helpful if you want to continue working with the output table later.  Again, use the `pipe-operator`. Notice that you have to call the data frame at the end of the code to show the result. 
+
+```{r "6_12"}
+# Enter your code here.
+```
+
+As you can see, the output is the same in both alternatives. We could also add more `dplyr` commands below, and every command would work with the data frame created in the previous line.
+
+If you want more information on the `pipe-operator`, visit the following website: https://www.analyticssteps.com/blogs/using-pipe-operator-simplify-your-code-r-programming.
+
+You may already notice that the `dplyr` package is quite powerful, and therefore we will continue to do some manipulative data analytics with `dplyr` in the next section.
+
+
+## Exercise 2.2 -- Characteristics of the participants
+
+In this exercise section, we want to examine the characteristics of the subjects. 
+Regarding the research question of why WTP is so low, it is interesting to know what the average participant is like. If the participants, for instance, were mainly of an older generation, a reason could be that they like to cook with traditional stoves regarding the low technology adoption. 
+In this context, I will point out and explain the first eight variables of the data set `dat_main` and create some additional ones.
+We will start with some variables relating to income and expenditure. As already indicated by the names of the variables, `b_incomeself_USD` is the daily income of a participant in USD, `hhincome_week_USD` contains information on the weekly household income in USD,  `Ènergy_spending_USD_week` is about the households' weekly outflow of money for energy and `charcoalbuy_week_USD` quantifies the weekly spending for charcoal in USD.  To compare income and spending more effectively, it is beneficial to present all data on a weekly basis. You may have noticed that the first variable, `b_incomeself_USD` is measured daily and hence we must create a new one on a weekly basis. If you remember the info box of the `dplyr package` from the last section, you may already know what function we need to add a new variable to our data set. Try to solve the following quiz, or just make a guess.
+
+
+
+Quiz: Which `dplyr` function do we need to add a new variable to our data set?
+
+[1]: select
+[2]: filter
+[3]: mutate 
+[4]: arrange
+[5]: group_by
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("dplyr")
+```
+**Task 2.2.1** We will use the data frame `dat_main` again. Just press `check` to load the data table.
+
+```{r "7_1"}
+dat_main=readRDS("dat_main.rds")
+```
+
+**Task 2.2.2** Create a new variable called `incomeself_weekly` based on `b_incomeself_USD` in the data set `dat_main` using the `pipe operator (%>%)`. Afterwards use `head()` to show the initial six lines of `dat_main` and check if these contain the new variable.  An incorrect code is already given, you are tasked to change the wrong parts.
+
+```{r "7_2"}
+
+dat_main= dat_main %>%
+filter(incomeself_daily=b_incomeself_USD*7) 
+head(dat_main)
+```
+
+Now, we have four variables that represent income and spending on a weekly basis.
+In addition, we aim to determine the level of education among the respondents. Low average education levels among the participants may contribute to low WTP for the Jikokoa stove due to a lack of understanding of the potential savings or inability to calculate them.
+In the `dat_main` data set, information on education can be obtained from the variable `b_educ`, which is measured on a scale from 0 to 130.
+
+**Task 2.2.3** Use `select()` and create a new data frame `dat_e` with `b_educ` as the only variable. Subsequently, order `dat_e` in a descending order using the function `arrange`(). Most of the code is already given, fill in the missing parts.
+
+```{r "7_3"}
+
+dat_e = select(____, _____) %>%
+  arrange(desc(___))
+dat_e
+```
+
+The value of 0 in the `b_educ` variable represents no education, while values from 0 to 39 indicate some primary education or special education for disabled individuals. A value of 39 represents completion of primary education and values from 39 to 44 indicate some secondary education. A value of 44 states completion of secondary education. Values above 44 display the number of years of completed schooling, with 130 representing higher education, such as university. However, none of the respondents in the data set have reported higher education.
+
+If you are interested in the Kenyan school system, make a guess on the following two questions.
+
+
+Quiz: How many years does primary school last in Kenya?
+
+Answer: 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("school")
+```
+
+
+Quiz: How many years does secondary school last in Kenya?
+
+Answer: 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("school2")
+```
+
+Because having so many different levels and values is not intuitive, we want to create two dummy variables indicating whether the respondent has a completed primary education and a completed secondary education ($1$) or not ($0$). To implement these two variables, we will use the function `group_by()` in combination with `mutate()` of the `dplyr` package. 
+
+**Task 2.2.4** Use `group_by()` to group the data frame `dat_main` on the different levels of  `b_educ`. Afterwards, create the variables `Primary_education` and `Secondary_education` using the function `mutate`(). The code is already given to you, just press `check`.
+```{r "7_4"}
+
+dat_main=dat_main %>%
+  group_by(b_educ)  %>%
+  mutate(Primary_education = as.integer(b_educ >= 39, na.rm = TRUE)) %>%
+  mutate(Secondary_education = as.integer(b_educ >= 44, na.rm = TRUE)) %>%
+  ungroup() 
+
+```
+
+The argument `na.rm=TRUE` allows us to remove missing values in the `b_educ` variable in case respondents did not provide information on their level of education. To confirm the presence of the two variables we created, we will inspect the data frame.
+
+**Task 2.2.5** Use `head()` to show the first six rows of `dat_main`.
+`.
+```{r "7_5"}
+
+
+```
+
+As you can see, we have two more columns with our education dummy variables at the end of the data frame!
+Except for the variables that have been discussed so far, we also want to examine other characteristics such as age, household size, gender, and the price of the stove which they owned before the experiment. To gain a comprehensive understanding of all relevant variables, we will utilize the function `skim()` of the package `skimr` which provides transparent summary statistics of data frames or vectors. Under this link you can get more information about the `skimr` package: https://cran.r-project.org/web/packages/skimr/vignettes/skimr.html
+
+The function `skim()` calculates statistical results like mean, quantiles and number of missing values of each column of a data frame. 
+
+**Task 2.2.6** Start by loading the `skimr` package using `library()`.
+
+```{r "7_6"}
+# Enter your code here.
+```
+
+Because we only want a summary statistic of the variables `age, Household_size, Primary_education, Secondary_education, incomeself_weekly, hhincome_week_USD, Energy_spending_USD_week, charcoalbuy_week_USD, savings_USD` and `c_cookstoveprice_USD` of our data frame `dat_main` we first need to use the `select()` command.
+
+**Task 2.2.7** Just run the following code to generate a summary statistic of the respondents' characteristics.
+<style>
+.skim_div table tbody tr td,.skim_div table tbody th {padding-left: 1em !important;}
+</style>
+<div class="skim_div">
+```{r "7_7",skimr_digits=2}
+dat_main %>%
+select(age, Female_respondent, Household_size, Primary_education, Secondary_education, incomeself_weekly, hhincome_week_USD, Energy_spending_USD_week, charcoalbuy_week_USD, savings_USD, c_cookstoveprice_USD) %>%
+skim() 
+```
+</div>
+
+The results of the statistical analysis reveal that the age range of the respondents extends from 18 to 82 years, encompassing all age groups. The gender distribution shows that almost 95 % of the participants are women, which is likely attributed to the prevalent social norms in Kenya, where women primarily engage in household chores. Approximately 26 % of the participants reported having completed secondary education, while a substantial proportion of the respondents reported having no formal education.
+
+
+Quiz: What is the approximate average **monthly** income of the respondents in USD?
+
+[1]: 25
+[2]: 50
+[3]: 100 
+[4]: 500
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("income")
+```
+
+
+Quiz: What proportion of weekly household income is spent on energy taking the median of both variables?
+
+[1]: 10 %
+[2]: 17 %
+[3]: 22 % 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("energy cost")
+```
+
+
+
+Quiz: How many monthly self-incomes the median respondent has accrued as savings?
+
+[1]: Not even one
+[2]: One and a half
+[3]: 3
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("savings")
+```
+
+
+Of note in this context is the observation that the median of nearly all variables is lower than the mean. This is a common pattern in the distribution of income and expenditure. This can also be observed in the income or savings distributions of entire countries, where a few extremely high-earning individuals skew the mean value upward.
+Furthermore, the price of the participant's current cook stove, the jiko, is comparatively inexpensive compared to the Jikokoa. Most participants reported purchasing a new stove once a year at a cost between 2 and 5 USD, which is significantly lower than the 40 USD cost of a Jikokoa. However, the manufacturer claims that the Jikokoa has a lifespan of three years and a minimum two-year warranty.
+
+
+It is apparent that you have acquired proficiency in the application of data manipulation methods using the `dplyr` package, and as such, you have earned the next award!
+
+
+In the next section we will scrutinize the usage of charcoal for the two different stoves and the willingness to pay variable. 
+
+## Exercise 3 -- Coal costs, willingness to pay and treatment effects
+
+
+
+The coal usage comparison before and after the adoption of a Jikokoa stove is assessed through the SMS charcoal study. Participants in the A1 and A2 treatment groups are required to report their weekly charcoal cost in USD every three days prior to the adoption of a Jikokoa during visit 2. This enables us to compare the coal usage of these respondents before and after adopting a Jikokoa. The weights of the ashes in the buckets are collected after visit 2 and weighed to compare the difference between Jikokoa owners and non-owners.
+
+The data frame `dat_main` includes variables that are utilized in the coal cost analysis. The variables `sms_amount_weekly_pre_USD` and `sms_amount_weekly_post_USD` are derived from the SMS charcoal study and provide information on the weekly cost of coal in USD before and after visit 2 and the potential adoption of a Jikokoa. The `jikokoa` variable is a binary indicator that reflects whether a respondent has adopted a Jikokoa (1) or not (0). The mean of these two SMS study variables can be obtained through the `summarize()` function in the `dplyr` library, providing a preliminary insight into potential differences.
+
+**Task 3.1** Start by loading the data frame `dat_main` with the function `read_RDS()`. Just press `edit` and  `check`.
+
+```{r "8_1"}
+dat_main=readRDS("dat_main.rds")
+```
+
+**Task 3.2** Use `summarize()` to display the averages of `sms_amount_weekly_pre_USD` and  `sms_amount_weekly_post_USD` of the data frame `dat_main` and name them `coal_cost_weekly_pre_visit2` and `coal_cost_weekly_post_visit2`. Just run the following code.
+
+```{r "8_2"}
+summarize(dat_main, coal_cost_weekly_pre_visit2=mean(sms_amount_weekly_pre_USD, na.rm=TRUE), coal_cost_weekly_post_visit2=mean(sms_amount_weekly_post_USD, na.rm=TRUE))
+```
+
+
+
+
+In the output, a significant reduction in coal cost is observed after visit 2. Prior to visit 2, all respondents used the traditional stove, incurring an average weekly coal cost of 7 USD, as reported by the SMS study. After visit 2, some participants adopted the Jikokoa while others did not, leading to an average weekly coal expenditure of 4.7 USD, which includes the costs incurred by those who still used the traditional stove.
+
+To further analyze the impact of Jikokoa adoption, we will conduct a similar analysis only on participants who adopted the Jikokoa and are members of treatment groups A1 or A2. The treatment condition is utilized to ensure an unbiased before and after effect, as the post-adoption average would otherwise include the coal costs of participants who did not participate in the pre-visit 2 SMS study.
+
+
+
+Quiz: What change in the results do you expect, if we only look at participants who have adopted the Jikokoa?
+
+[1]: The average coal cost after visit 2 will be lower
+[2]: The average coal cost after visit 2 will be higher
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("cost")
+```
+
+We expect an even lower average of coal cost because now we only consider the coal costs of Jikokoa adopters. If the Jikokoa indeed needs less coal, costs should be less than for those who still use the traditional stove. 
+
+**Task 3.3** Use `filter()`to filter `dat_main` for Jikokoa owners and members of A1 and A2. Subsequently, display again the average of `sms_amount_weekly_pre_USD` and  `sms_amount_weekly_post_USD` with the command `summarize()` as in the exercise above. However, this time display the averages with the names `coal_cost_weekly_jiko` and `coal_cost_weekly_jikokoa`. 
+
+```{r "8_3"}
+
+dat_main %>%
+______(jikokoa==1 & (a1 == 1 | a2==1))%>%
+summarize(_____=mean(sms_amount_weekly_pre_USD, na.rm=TRUE), coal_cost_weekly_jikokoa=____(sms_amount_weekly_post_USD, na.rm=TRUE))
+```
+
+Indeed, we can see a further decline in the weekly coal cost. The mean weekly coal expenditure of adopters of the Jikokoa stove in groups A1 and A2 is 4.15 USD, representing a reduction of 40 % compared to the previous expenses associated with the utilization of traditional cooking methods. This almost matches the 50 % savings claimed by the manufacturer. Also, we can recognize that Jikokoa adopters had a slightly higher weekly coal cost before visit 2 using the traditional jiko stove. This could indicate that respondents with higher coal costs are more likely to get an efficient stove in the experiment. They are willing to pay more for a Jikokoa and therefore have a higher chance of acquiring one with the BDM mechanism. 
+
+
+We can also graphically display this analysis using the data frame `dat_sms` of the SMS study data. To create declarative graphics in `R` there exists a powerful package named `ggplot2`. In case you are unfamiliar with the package, you will find some information about it in the info box below. If you want further information, you can have a look at the following website: https://datacarpentry.org/R-ecology-lesson/04-visualization-ggplot2.html
+
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("Package ggplot2")
+```
+
+**Task 3.4** Start by loading the package `ggplot2` and `ggthemes` using the `library()` command.
+
+```{r "8_4"}
+# Enter your code here.
+```
+
+Our illustration should demonstrate the cost of coal before and after visit 2 for participants who adopted and did not adopt a Jikokoa. For the respective respondent's SMS survey data, we also need the information of the `jikokoa` dummy variable. To accomplish this, the cost of coal data from the SMS survey is combined with the `jikokoa` variable information from the `dat_main` data frame. To maintain consistency the two frames are matched by the respondent ID's. 
+
+The `dplyr` package has a helpful function `left_join` to add columns from `dat_main` on the left side of `dat_sms`. Just run the following line of code, which will create a new data frame `dat_join` incorporating the variable `jikokoa`.
+
+**Task 3.5** First we load the data `SMS_clean_sms_replication.dta` again. Use `read_dta()` and save the table to the variable name `dat_sms`.
+
+```{r "8_5"}
+# Enter your code here.
+```
+
+**Task 3.6** Use the `left_join()` command to merge `dat_sms` with the column `jikokoa` of `dat_main` by the respective respondent ID. The code is already set up. Investigate what happened with the `jikokoa` variable. 
+
+```{r "8_6"}
+dat_join=left_join(dat_sms,select(dat_main, respondent_id,jikokoa), by="respondent_id")
+head(dat_join)
+```
+
+Because in the data table `dat_sms`, every respondent is listed several times, the new characteristic of Jikokoa adoption in this frame is now contained for every SMS date. In the regression analysis we will conduct later, we have to correct for this phenomenon.
+
+To create a meaningful figure, the `dat_join` data frame requires several manipulations. `WsinceV2` relates to the number of weeks starting from visit 2 ("-" indicates the week is before visit 2), and `amount_weeekly` is the weekly coal cost per respondent in Kenyan shilling.  
+The data frame is filtered by `WsinceV2` to get a time frame from four weeks before visit 2 to eight weeks after visit 2. Rows without an entry for the variable `jikokoa` are removed. To be able to compute an average weekly coal cost with and without Jikokoa, the data frame must be grouped not only by the corresponding week but also by the Jikokoa adoption dummy variable. Afterwards, the average cost per week can be computed with `summarize()`. To create the graph, `jikokoa` has be transformed into a factor. 
+
+**Task 3.7** Run the following chunk and examine what changed compared to `dat_join`.
+
+```{r "8_7"}
+dat_join=left_join(dat_sms,select(dat_main, respondent_id,jikokoa), by="respondent_id") %>%
+  filter(WsinceV2>-4 & WsinceV2<8, !is.na(jikokoa))%>%
+  group_by(WsinceV2, jikokoa) %>%
+  summarize(amount_weekly_ges= mean(amount_weekly, na.rm=TRUE)) %>%
+  mutate(jikokoa=as.factor(jikokoa))
+dat_join
+```
+
+As a result, we have two averages of coal spending for every week, one for Jikokoa adopters and one for non-adopters.
+
+
+**Task 3.8** The following code creates the respective graph. It consists of the basic `ggplot()` function that specifies the data and the axes. In addition, the `geom_line()` function as well as  `geom_point()`  are used to plot the coal costs for adopters and non-adopters in pre and post-periods of visit 2 . By using  `geom_vline()` a vertical reference line at visit 2 is added. To get the result in USD, `amount_weekly_ges` is divided by 100. Execute the code and examine the resulting plot.
+
+```{r "8_8",fig.width=6, fig.height=4}
+ggplot(data=dat_join, aes(x=WsinceV2, y=amount_weekly_ges/100, color=jikokoa, linetyp=jikokoa))+
+  geom_line(size=2)+
+  geom_point(size=4)+
+  geom_vline(aes(xintercept=0), colour="#BB0000", linetype="dashed")+
+  labs(title = "Weekly coal costs Jikokoa vs. old stove", x = "Weeks since Visit 2 (Jikokoa adoption)", y = "Weekly expenses for coal in USD") +
+  scale_color_discrete(labels = c("No", "Yes"), name = "Jikokoa adoption")+
+  scale_x_continuous(limits = c(-4, 8),breaks = seq(-4, 8, by = 1)) + 
+  scale_y_continuous(limits = c(0, 10),breaks = seq(-0,10, by = 1))+
+  theme_wsj(base_size=8,color = "brown",
+  base_family = "sans",
+  title_family = "mono")
+
+```
+
+In the graph, we can see again the cost drop from approx. 7 USD to 4 USD using a Jikokoa. Over time, the costs are even slightly below 4. Interestingly, the weekly coal cost associated with the traditional jiko drops slightly to 6 USD. Perhaps participants are trying to be more economical with their usage of coal, as their attention is strongly focused on the charcoal costs of the household as part of the experiment. However, that is just speculation. 
+
+Fact is, if a saving of 3 USD per week resulting from a cost drop from 7 USD to 4 USD is assumed, the saved costs are approx. 150 USD per year. This exceeds the price of the Jikokoa (40 USD) by far.
+In addition, the decline in charcoal consumption reduces annual emissions by 3.5 tons of carbon dioxide equivalent ($CO_2$) per household, which corresponds to a value of 147 USD per year when applying a social cost of carbon of 42 USD, which is estimated by the United States Environment Protection Agency (EPA) for 2020 (EPA, 2016). This social cost constitutes the damage of one additional ton of $CO_2$ in USD.
+The results of the ash collection in bucket data can be analyzed to verify the previous findings. Information about the bucket weight in kg is stored in the variable `bucket_kg_st`.
+
+**Task 3.9** Group the data of `dat_main` by the variable `jikokoa` and show the average bucket weight for each manifestation of `jikokoa`. The code is already given but with errors, correct the code and analyze the output.
+
+```{r "8_9"}
+dat_main %>%
+group_by(jikokoa)%>%
+select(Weight_of_bucket= sum(bucket_kg_st, na.rm=TRUE))
+```
+
+Based on the output, we can observe that the weight of the bucket in the case of a Jikokoa adoption is substantially lower. The reduction of 38% to approx. 2 kg coincides with the cost reduction percentage.
+
+In the next section, we will conduct a regression analysis on the reduction of charcoal cost to examine if there is a causal relationship between Jikokoa adoption and charcoal expenses. The previous descriptive analyses have not proven a causal relationship, as controlling for other variables is not possible. It could be that only wealthy participants with smaller household sizes adopted the Jikokoa, leading to less cooking and lower expenses in the adoption group. In this case, the savings would be a result of external circumstances and not of energy-efficient technology (Westhoff, 2013). However, with our descriptive examinations we gain a better understanding of the variables and the research subject.
+
+But for now, we will continue with examining the willingness to pay (WTP) which is determined within the framework of the BDM process during visit 2.  Participants were asked if they would be willing to pay a certain amount for the Jikokoa stove, with the question being repeated with a higher or lower amount based on their previous answer. The final WTP is recorded in USD in the variable `finwtp_USD`. 
+First, we are interested in examining the WTP of respondents who are neither in treatment group A nor treatment group C. This is because it reflects the WTP in the absence of credit options or other educational measures to increase awareness of the Jikokoa stove.
+To get a quick overview of the distribution of WTP, we will create a histogram of `finwtp_USD`. Therefore, we have to filter our data frame `dat_main` only for respondents in the overall control group. Participants who are only assigned to the control group in both treatments can be recognized by the dummy variables `treata_pooled` and `treatc_pooled`. Both variables are equal to $1$ if the respondent is in the respective treatment group, and $0$ if they are not, which indicates that they are in the control group.
+
+**Task 3.10** Use `filter()` to filter `dat_main` only for respondents in the overall control group (`treata_pooled=0` and `treatc_pooled=0`) and save it to `dat_control`. Fill in missing parts of the code. 
+
+```{r "8_10"}
+dat_control=_____(dat_main, ______ & treatc_pooled==0)
+```
+
+**Task 3.11** Run the line of code to create a simple histogram. Analyze the distribution of the willingness to pay.
+
+```{r "8_11"}
+hist(dat_control$finwtp_USD)
+```
+
+From the histogram we can derive that most of the respondents' WTPs without any treatment are between 0 and 15 USD. To get a more precise idea, we calculate the average WTP of the control group.
+
+**Task 3.12** Use `summarize()` to display the mean of `finwtp_USD` of the filtered data frame `dat_control` and label the mean `WTP_control`. NA-values should be ignored.
+
+```{r "8_12"}
+# Enter your code here.
+```
+
+The average WTP accounts for approx. 12 USD which is well below the market price of 40 USD. Especially regarding the enormous saving potential as analyzed before, the WTP does not seem to be rational. One reason for this phenomenon could simply be that the participants do not have enough savings to be able to afford this sum. Access to credit is often complex and costly in developing countries. To see if low-cost credit could increase WTP and thus be a way to promote energy-efficient technologies in developing countries, some participants in this experiment were given the opportunity to raise a 3-month loan at 1.16 % interest. 
+To catch a first glimpse if treatments in the experiment are successful, we compute the overall average of WTP. 
+
+
+Quiz: If the treatments have a positive effect, the total average WTP should be...?
+
+[1]: lower
+[2]: higher 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("WTP")
+```
+
+**Task 3.13** Use `summarise()` on the data frame `dat_main` to show the overall average of `finwtp_USD` and display the mean as `WTP_ges`.
+
+```{r "8_13"}
+# Enter your code here.
+```
+
+As a result, treatments seem to have an effect, because the average WTP including respondents in treatment groups is with 20 USD substantially higher than only the control group WTP. 
+
+The treatment effect of the attention and credit treatment for an individual *i* is the difference between the potential outcomes: 
+$$
+\tau_{i} =  y_i^{(1)} - y_i^{(0)} 
+$$
+with the potential outcome $y_i^{(1)}$ in the treatment group and $y_i^{(0)}$ for every respondent $i$ in the respective control group. The outcome in our case is the WTP in the control group (C0, A0) and in the credit (C1, C2) as well as the attention group (A1, A2). However, individuals cannot be in the control and treatment groups simultaneously, leading to the inability to measure individual treatment effects $\tau_{i}$. Instead, under the condition of a randomized experiment, we can estimate the average treatment effect by taking the average of all respondents in the respective group. 
+$$
+E(\tau_{i}) =  E(y_i^{(1)} - y_i^{(0)}) 
+$$
+In the following chunk, we will manually compute the average treatment effect of the different pooled treatment groups (A, C).  In exercise 5 we will determine the effects of the individual subgroups (A1, A2, C1, C2) using an instrumental regression.
+To examine the effectiveness of the two main different treatments, we have to group the table by `treata_pooled` and `treatc_pooled`. 
+
+**Task 3.14** Use `summarise()` combined with `group_by` on the table `dat_main` to display the average WTP of the respective respondents in the control and treatment groups. The code is already given, just press `check` and contemplate the output table. 
+
+```{r "8_14"}
+dat_main %>%
+group_by(treata_pooled, treatc_pooled)%>%
+summarise(WTP_ges=mean(finwtp_USD, na.rm=TRUE))
+```
+
+
+Quiz: Which treatment leads to the maximum treatment effect, according to the observed averages from above?
+
+[1]: Attention treatment
+[2]: Credit treatment
+[3]: A combination of attention and credit treatment
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("treatment groups")
+```
+
+
+Quiz: Which treatment group has a higher treatment effect?
+
+[1]: Attention group
+[2]: Credit group
+[3]: There is no treatment effect in both groups
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("treatment groups2")
+```
+
+
+Quiz: state the average treatment effect in USD $E(\tau_{i})$ for the credit treatment (0 digits).
+
+Answer: 
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("treatment groups3")
+```
+
+If we regard the mean values of the various treatment groups in the results table, it quickly becomes apparent that access to cheap credit is the most crucial factor in increasing the WTP. Having a credit opportunity, WTP more than doubled from 12 USD to over 24 USD. Whereas the attention treatment, in which attention is drawn to the savings or net benefits, seems not to be a key for success in promoting energy-efficient technologies. The average treatment effect $E(\tau_{i})$ in the attention group only accounts to 0.3 USD.
+To investigate the influence of the treatment groups on the WTP distributions, we want to generate a histogram for each group with `ggplot`. With the function `facet_wrap()` of the `ggplot` package, it is possible to create several subplots in one overview. 
+
+**Task 3.15** Start by creating a new column, `treatment`, indicating the subordinate treatment group with the function `mutate()`. Then create a histogram using the `ggplot package` including `facet_wrap()` for each treatment category on `finwtp_USD`. Most of the code is already given, try to add the missing parts.
+
+```{r "8_15"}
+dat_main %>%
+ mutate(treatment = ifelse(treata_pooled == 0 & treatc_pooled == 0, "0",
+                    ifelse(treata_pooled == 0 & treatc_pooled == 1, "C",
+                    ifelse(treata_pooled == 1 & treatc_pooled == 0, "A",
+                    ifelse(treata_pooled == 1 & treatc_pooled == 1,"AC", NA))))) %>%
+ ggplot(mapping=aes(x=______, fill=treatment))+
+   ________(binwidth = 3, position = "identity", alpha = 0.6)+
+   facet_wrap(~treatment)
+```
+
+
+From the output, we can conclude that most respondents are in both treatment groups (AC) and that the credit treatment shifts the distribution to a higher WTP.
+
+Finally, we also want to study the histogram and the average of the BDM price distribution. The random BDM price allocated to each respondent is stored in the variable `price_USD`. At this price, the participants have to purchase the Jikokoa as long as it is below the respective WTP.
+
+**Task 3.16** Use `hist()` to create a histogram of `price_USD` of the data frame `dat_main`. If you are unsure of how to proceed, refer to Task 3.10 for guidance.
+
+```{r "8_16"}
+# Enter your code here.
+```
+
+From the resulting histogram, we can recognize that prices are distributed from 0 to 30 USD. The highest frequencies of prices are around 10 and around 25 USD. 
+
+**Task 3.17** Use `summarize()` to display the mean of `price_USD` of the data frame `dat_main` and label it `BDM_price`.
+
+
+```{r "8_17"}
+# Enter your code here.
+```
+
+The average cost allocated to participants is approximately 17.5 USD, significantly lower than the standard price of 40 USD for a Jikokoa stove. In the experiment, respondents are able to purchase the stove at a substantial discount.
+Analogously, we can also display the proportion of Jikokoa adopters, who have purchased it at the reduced BDM price.
+
+**Task 3.18** Use `summarize()` to display the mean of `jikokoa` of the data frame `dat_main` and label it `fraction_adoption`. The code is already displayed to you, just press `check`.
+
+```{r "8_18"}
+dat_main %>%
+summarise(fraction_adoption=mean(jikokoa, na.rm=TRUE))
+```
+
+In the study, approximately 60 % of participants adopted the Jikokoa stove at a significantly reduced price. Note that this fraction includes the adoption due to both the attention and credit treatment.
+
+During this chapter, we learned about different discoveries of the experiment. Despite savings per year that exceed the purchase price of 40 USD by far, the population is only willing to pay a mere fraction of 12 USD for the charcoal-saving stove. However, the average maximum buying price doubles to 24 USD for individuals with access to credit with low-interest rates. Whereas drawing attention to possible savings and costs of the Jikokoa does not change much in buying behavior. As part of the experiment, respondents can acquire the new stove at a discounted random price with a mean of 17 USD. Almost 60 % of the participants have taken advantage of this reduced price.
+
+In the next exercise section, we will start working with linear regressions to analyze if the effects of adopting a Jikokoa on weekly charcoal savings are significant and how results change if we control for a bunch of variables. 
+
+
+
+
+## Exercise 4 -- Effect of stove adoption on weekly charcoal spending ##
+
+We already analyzed manually that stove adoption reduces weekly charcoal spending by approximately 40 % taking the population of the study. However, in addition to the mere explanatory value of this fact, we are also interested in its significance. Therefore, we do not leave it to the manual results but also examine them with the statistical help of regressions. Regressions are a versatile tool that can help in understanding complex relationships and uncover hidden patterns in the data. Besides checking for significance, they allow us to control for some effects, like in our case socioeconomic characteristics. By controlling for these variables, it is possible to isolate the effect of the independent variable on the dependent variable and determine whether it is statistically significant. Hence, we can determine the relationship between the variables while considering other variables that may also be influencing the outcome.
+
+We will start with a simple linear regression without any other variables, examining the effect of stove adoption on weekly charcoal spending using the ordinary least squares estimation (OLS).
+
+Let us have a look at the resulting regression formula with which we aim to investigate the relationship between Jikokoa adoption and coal expenses:
+
+$$
+amountweekly _{it} = ß _{0} + ß_1jikokoa_{it} + \varepsilon_{it}
+$$
+
+
+where $amountweekly _{it}$ reflects the weekly cost for charcoal in USD and $jikokoa_{it}$ is the the dummy variable whether the Jikokoa stove was bought or not.
+
+
+Quiz: What measures $ß_0$?
+
+[1]: the average cost per week resulting without a Jikokoa
+[2]: the average cost per week resulting with a Jikokoa
+[3]: the reduction/increase in weekly charcoal cost if a Jikokoa is adopted
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("linear regression beta 0")
+```
+
+Quiz: What measures $ß_1$?
+
+[1]: the average cost per week resulting without a Jikokoa
+[2]: the average cost per week resulting with a Jikokoa
+[3]: the reduction/increase in weekly charcoal cost if a Jikokoa is adopted compared to non-adoption
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("lin reg beta 1")
+```
+
+
+Quiz: What measures $\varepsilon_{it}$?
+
+[1]: the error term/disturbance of the regression
+[2]: the distance from data points to the regression line
+[3]: it represents the effect of variables or other influences that were not captured in the equation
+[4]: it should be a random variable with a mean of zero and a constant variance
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("lin reg epislon")
+```
+
+
+To conduct the regression, we have to load the data frame `dat_reg.rds` which is similar to the joined data frame from *exercise 2*, where we joined `dat_sms` with the variable `jikokoa`. Additionally, I added some other variables we will use in later regressions. Furthermore, I winsorized the weekly charcoal expense to the 99th quantile to prevent outliers. The data frame only contains observations after visit 2, where Jikokoa adoption started. I saved the table as *RDS* file typ **.rds**, the typical R data storage format. We need the function `readRDS()` to load this data file.
+
+
+**Task 4.1**  Start by loading the data file `dat_reg.rds` with `readRDS()` and save it to `dat_reg`. 
+
+```{r "9_1"}
+# Enter your code here.
+```
+
+The familiar data frame `dat_main` will also be needed in the following exercises. 
+
+**Task 4.2** Continue by pressing `edit` and `check` to load `dat_main.rds` again and save it to the variable `dat_main`.
+
+```{r "9_2"}
+dat_main=readRDS("dat_main.rds")
+```
+
+### Simple linear regression 
+
+In `R` we can conduct linear regressions with the `lm()` command. The syntax is the following: `lm(dependent_variable~explanatory_variable_1+explanatory_variable_2+...+explanatory_variable_n, data frame, subset)`. More information you can get with the following link: https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/lm
+
+**Task 4.2:** Conduct a linear regression with `lm()` corresponding to our regression formula above on the corresponding data frame `dat_reg`. The dependent variable is `amount_weekly_USD` and as explanatory variable we take `jikokoa`. Save the linear regression to `reg_ols`. Show the statistical summary with `summary()`.  
+
+```{r "9_3"}
+# Enter your code here.
+```
+
+
+Quiz: Based on the results of the regression analysis, what inferences can be drawn?
+
+[1]: the reduction of weekly charcoal costs amounts to 1.93 USD if a Jikokoa is adopted
+[2]: the relationship is significant
+[3]: the average weekly charcoal costs using a Jikokoa are 5.71 USD
+[4]: there exists a causal relationship
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression output")
+```
+
+
+In the simple linear OLS regression, we get a result of 1.93 USD savings per week in charcoal spending due to a Jikokoa stove and a constant of 5.71, representing the average charcoal cost with a traditional stove.
+Questionable is if the result represents a consistent estimate of $ß_1$ and if we can already make assumptions about causality. Causality means that the reduction of the weekly charcoal expense is indeed caused by the Jikokoa adoption.
+
+
+To get a consistent beta estimation, the error term has to be independent of the explanatory variable $E(x|\varepsilon)=0$, otherwise there exists an **endogeneity issue**. However, if variables that are related to the dependent variable as well as the explanatory variable are omitted, this independence is not satisfied. This is known as **omitted variable bias** and is one source of an **endogeneity problem** (Lang, 2016). In the present case, the independence of the error term appears to be violated.
+
+If you are unfamiliar with the concepts of control variables or endogeneity, refer to the information box below for a concise illustration.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("Control variables and the endogeneity problem")
+```
+
+For instance, the household size might be considered as an explanatory variable for weekly coal costs. Adoption of a Jikokoa stove is likely not independent of this factor, as larger households are able to achieve greater savings from energy-efficient stoves, thereby increasing their likelihood of adoption. The relationship between `jikokoa` and `Household_size` can be examined by computing their correlation.
+
+**Task 4.3** The correlation can be computed with the `cor()` function. Just press `check`. 
+
+```{r "9_4"}
+cor(dat_main$Household_size, dat_main$jikokoa,use="complete.obs")
+```
+
+The result is a correlation slightly above zero, so we should incorporate household size in our regression to avoid endogeneity. Otherwise, the result is a biased estimator $\hat\beta_1$.
+
+To compare our regression results we can use the function `stargazer()` from the package `stargazer`. If you want to learn more about that practicable command, take a glance at the following info box.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("stargazer() function of the package stargazer")
+```
+
+
+**Task 4.4** Add `Household_size` as control variable to the regression above and compare the results with `stargazer()`. Save this regression to `reg_cont`. The code is already given
+
+```{r "9_5"}
+reg_cont=lm(amount_weekly_USD~ jikokoa + Household_size, dat_reg)
+stargazer(reg_ols, reg_cont, type="text")
+```
+
+We can deduce a higher reduction in weekly coal spending due to Jikokoa adoption, including the size of a household as control variable. The bias of the Jikokoa estimator can be computed with the following formula: 
+
+$$
+Bias(\hat\beta)=E\hat\beta-\beta
+$$
+where $E\hat\beta$ is the expected value of $\hat\beta$ and $\beta$ the unobserved and unbiased true estimate. The bias is an over - or underestimation compared to the true value $\beta$ of the Jikokoa influence. In our case, the omitted variable bias leads to an underestimated reduction of $-1.927-(-1.994)=0.067$ USD per week, assuming the $E\hat\beta$ of the regression with household size as a consistent estimate. The bias is positive because `jikokoa` and `Household_size` have a positive correlation and $\hat\beta_2$ is also $> 0$ (Gujarati & Porter, Chapter 13, 2003). 
+
+But this omittance also applies to other socioeconomic factors. To obtain the most accurate estimator possible, the following socioeconomic variables are used as control variables, including baseline savings, income, risk aversion, credit constrainedness, and the number of adults and children. A small lottery task measures the respective risk aversion `RiskAverse`. Whereas `CreditConstrained` measures how easily the respondent can borrow money and if they have access to credit at all. Furthermore, the randomly allocated price is included as a control variable as well as the WTP. 
+The treatment dummy variables `treata` and `treatc` are probably also relevant for the weekly coal costs. Respondents are likely to reduce their costs if they are educated about their expenses or have to pay back credit debts.
+In the instrumental variable regression method, which we will apply in the next chapter, the researcher also used the weekly coal cost before the Jikokoa adoption possibility at visit 2 as an additional control variable. This information is stated in the variable `sms_amount_weekly_pre`, though it is only available for respondents of the A1 and A2 treatment groups. For the other participants, who did not participate in the SMS survey before visit 2, the value is set to the average coal cost of the A1 and A2 members in this survey. 
+Because it is questionable to omit this variable in the OLS regression, I added it also in this regression method.
+
+**Task 4.5** Add the remaining control variables to the regression from above. Use `dat_reg` as data set and show a summary output of the regression results. Most of the code is already given, but a few gaps still need to be filled in.
+
+```{r "9_6"}
+reg_control=lm(amount_weekly_USD~______ + Household_size+b_children+  savings_KSH + b_incomeself_KSH+ RiskAverse+ CreditConstrained+d_jikokoalast_years+v1_beliefs_annual_mean+ v1_beliefs_annual_sd+finwtp_USD+price_USD+treata+treatc+sms_amount_weekly_pre, _____)
+stargazer(reg_ols, reg_control, type="text")
+```
+
+Conducting the regression including control variables, the weekly charcoal reduction, due to adopting an energy efficient stove, is associated only with 1.88 USD and not with 1.93 as in the estimation without control variables. By omitting additional relevant factors for the weekly charcoal cost, the estimate $\hat\beta_1$ shows a marginal negative bias. 
+Remarkable is the large increase of the adjusted $R^2$, which means that now 31.2 % instead of 11.9 % of the weekly charcoal amount variance is explained by the used variables. We review the adjusted $R^2$ and not $R^2$ as a measure of how well our model predicts the dependents variable because our model is a multiple regression. Every additional variable in a regression leads to a higher $R^2$, even if the model suffers from overfitting. The adjusted $R^2$ corrects that a model with added variables may seem to have a better fit just because it has more terms and only increases if the added factor enhances the model (Greene, 2020).
+
+**Note:** By adding control variables the interpretation of $ß_1$ change. The statement that the charcoal savings amounts to 1.88 USD per week only applies if the values of all control variables remain constant. That means the cost reduction applies to someone who purchased a Jikokoa vs. someone who has not adopted the stove but has apart from that the same characteristics.
+
+### Clustered standard errors
+
+Getting a precise and unbiased $\hat\beta$ is not the only critical ingredient for statistical inference. We should also pay attention to estimating a correct standard error, which is substantial for making statements about the significance and getting correct results in hypothesis testing. To obtain accurate standard errors, errors must be uncorrelated and distributed with roughly the same variance. As you may have noticed, every participant has several data points due to various SMS times in our data set. This matter leads to correlated errors in these "respondent groups". Hence, every respondent represents a so-called **cluster**. Between these clusters, errors are uncorrelated. This circumstance needs to be controlled through **cluster robust standard errors**,  since ignoring it can lead to strongly underestimated standard errors. 
+
+
+In R we can solve this problem by using the function `felm()` from the package `lfe`  instead of `lm()`. The `felm()` function provides a wide range of capabilities in conducting regression analysis, including the option for clustering to obtain robust standard errors.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("felm() function of the package lfe")
+```
+
+
+**Task 4.6** First, load the package `lfe`. Then use `felm()` to regress `jikokoa` on the weekly charcoal cost with standard errors that are clustered for each respondent. Also take the control variable into account. Store the result in `reg_clust`. If you need to learn how the function works, have a look at the info box above. Replace the blanks ___ with the correct code and press `check` afterwards.
+
+```{r "9_7"}
+library(lfe)
+reg_clust=felm(amount_weekly_USD~jikokoa + Household_size+b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained+d_jikokoalast_years+v1_beliefs_annual_mean+ v1_beliefs_annual_sd + finwtp_USD +price_USD + treata + treatc + sms_amount_weekly_pre|0|0|_______,  dat_reg)
+stargazer(reg_clust, reg_control, type="text")
+```
+
+
+Quiz: Clustered standard errors are?
+
+[1]: higher than the standard errors in lm() regression
+[2]: lower than the standard errors in lm() regression
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression output 2")
+```
+ 
+The reduced weekly charcoal expense due to the Jikokoa stove is still significant at a 1 % level. However, the significance of the control variables has changed, and with robust standard errors, fewer control variables are significant anymore. We can observe a considerable difference between the normal and the clustered standard errors. Using normal standard errors leads to unreasonably high p-values and consequently overestimates significance. 
+
+
+
+### Summary
+
+In this chapter, we learned how to conduct an OLS regression and that we must be careful with dependencies and omitted variables in our model. Just using `jikokoa` as a dependent variable in our model leads to a biased estimator of $-1.93$ USD per week due to an endogeneity problem in the regression of Jikokoa and weekly coal expense. After controlling for other systematic effects like household size, children, etc., we got an estimate of $\hat\beta_1$ of $-1.88$ USD  instead of $-1.93$ cost reduction per week. 
+Regarding the $R^2$ value, the size increased sharply utilizing control variables. Now 31.3 % of the variance of weekly charcoal cost can be explained by the independent variables compared to 12 % achieved by the simple regression.
+Another difficulty resulting from the data structure is that each participant occurs several times, thus forming groups with different variations in the error term. Therefore, we used the `lfe` package to control for clusters to obtain correct standard errors. After using cluster-robust standard errors, no control variable is significant anymore except the primary explanatory variable `jikokoa`.
+Using control variables is one concept to mitigate the endogeneity problem, but the main method to estimate causal relationships in such a case is an instrumental variable regression (IV-regression). The next chapter will explore this special regression form and its corresponding advantages.
+
+
+
+
+## Exercise 5 -- Effect of stove adoption on weekly charcoal spending using instrumental variable regression (IV) ##
+
+
+Returning to the endogeneity problem, we will consider the most powerful way to solve the dependence of the explanatory variable on the error term. The instrumental variable approach replaces the original explanatory variable with an instrumental variable. Using IV allows you to study the effect of only the part of the endogenous variable that the instrument can explain. Adding additionally the control variables we used before (which are assumed to be exogenous), provide an effect closer to the average effect of the endogenous variable. The IV regression approach will not solve the bias problem, but it can mitigate it.
+
+The instrument has to fulfill two conditions to be valid:
+
+  - relevance: the instrument $z$ is correlated with original variable $cor(z, x) ≠ 0$
+  - exogeneity: the instrument $z$ is not correlated with the error term $cor(z, \varepsilon) = 0$
+ 
+Also noteworthy is that for every endogenous variable in the regression model, one needs at least one instrument which is not an explanatory variable in the model. The feasibility of using the instrumental approach depends on the availability of suitable instruments.
+For a deeper understanding of the theory behind instrumental variable regression, you can read Kennedy, P. 2008: A guide to econometrics, Chapter 9.
+
+To measure the effect of the causal relationship between the adoption of Jikokoa stoves and the reduction of coal costs without an endogeneity bias, the researchers created a randomly allocated purchase price for the stove within the BDM mechanism. This effect is independent of other systematic factors. They use this random price as an instrument, assuming it fulfills both instrumental variable requirements. Considering the correlation requirement, it is likely that the random price is correlated with the adoption of the energy-efficient stove since adoption is dependent on the price level. As a reminder, the Jikokoa can only be purchased at the willingness to pay (WTP) level if the random BDM price is lower than the WTP.
+Using a randomly allocated purchase price, the researchers also fulfill the second condition of exogeneity, as the price is not dependent on any other factor and, therefore, independent of the error term. The respective BDM price is stored in the variable `price_USD`. The *relevance* condition can be verified by computing the correlation between the explanatory variable (adoption of Jikokoa stoves) and the instrument (a random price). This will determine whether the instrument is strongly correlated with the explanatory variable, indicating the suitability of the instrument for estimating the causal relationship between coal consumption and Jikokoa adoption.
+
+
+
+
+Quiz: What is your prediction for the correlation between the variables `jikokoa` and `price_USD`?
+
+[1]: positive correlation
+[2]: negative correlation
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression IV 1")
+```
+
+The higher the random price of the new stove, the lower the likelihood that it will be below the respective WTP. Thus, the likelihood of a Jikokoa adaptation will also decrease and we expect a negative correlation between the two variables. 
+
+**Task 5.1**  As usual, first load the data files `dat_reg.rds` and `dat_main.rds` with `readRDS()` and save it in `dat_reg` and `dat_main`. 
+
+```{r "10_1"}
+# Enter your code here.
+```
+ 
+**Task 5.2** Use the command `cor()` to check the correlation between `jikokoa` and `price_USD` of the data frame `dat_main`. To ignore NA-values, put `use="complete.obs"` at the formula's end as in *Task 4.3*.
+```{r "10_2"}
+
+
+```
+ 
+The result is indeed a negative correlation of -0.45 between the adoption of the Jikokoa and the randomly allocated price. 
+The *exogeneity* condition cannot be verified through computation alone. While statistical tests and computational methods can provide evidence for or against the exogeneity of a variable, they cannot provide definitive proof. But we can also consider the data-generating process to reflect if the `price_USD` is independent of the error term. As it is a random variable, we assume independence.  
+
+There is also a second variable that meets the two requirements. However, Berkouwer and Dean used only the BDM price as instrument in their paper, wherefore we will first have a look at this type of model. In the following chapter, I will present the results incorporating the second instrument as well.
+
+Instrumental variable (IV) regression is distinct from simple linear regression in that it uses a different estimation method, precisely the **Two Stage Least Squares** method. The first step of an instrumental regression is the regression of `jikokoa` on the instrument `price_USD` with a classical OLS regression including the control variables. The first regression equation is represented as follows:
+
+ 
+$$
+jikokoa_{it }= \beta_0 + \beta_1prizeUSD_{it}+controls_{it} +u_{it}
+$$
+
+
+
+Quiz: If we would regress `jikokoa` on `price_USD` what sign of $\hat\beta_1$ would you expect?
+
+[1]: negative
+[2]: positive
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression IV 4")
+```
+
+
+From the negative correlation, we can also expect a negative sign in the corresponding beta coefficient.
+
+
+In the second step of the IV regression, the predicted values of $\hat{jikokoa_{it}}$ from the first regression are used as the independent variable in a second regression, with the original dependent variable `amount_weekly` as the dependent variable. This second regression equation estimates the parameters of interest in the IV regression model.
+
+$$
+amountweekly_{it} =ß_0+ ß_1\hat{jikokoa_{it}} +controls_{it}+ \varepsilon_{it}
+$$
+The result is that `amount_weekly` is regressed on `jikokoa`, but the predicted values of `jikokoa` embody only the variation of the random BDM price, leading to an independent error term. 
+Further information about the **Two Stage Least Squares** method you can find in Woolridge (2012): Introductory Econometrics: A modern Approach, p. 528.
+
+The IV regression can also be performed using the `felm()` function from the `lfe` package, which we already utilized for clustered standard errors. Look again at the info box, I created for this function to get an idea on how to conduct an IV-regression with this command. 
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info("felm() function of the package lfe 2")
+```
+ 
+**Task 5.3** Use `felm()` to estimate an instrumental variable regression with `price_USD` as the instrument and save it in `reg_iv`. Hint: IV regression is specified in the third part of the `felm()` function and the instrumented variable (`jikokoa`) can be left out in the first part. Afterwards, compare the IV regression result with `stargazer()` to the OLS regression `reg_clust` using control variables and clustered standard errors. For this comparison, `reg_clust` has to be run again.
+
+```{r "10_3"}
+
+reg_iv=felm(amount_weekly_USD~ Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained +d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd+ finwtp_USD + treata + treatc + sms_amount_weekly_pre|0|______| respondent_id,  dat_reg)
+
+reg_clust=felm(amount_weekly_USD~jikokoa + Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained +d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd+ finwtp_USD + price_USD + treata + treatc + sms_amount_weekly_pre|0|0|respondent_id,  dat_reg)
+stargazer(reg_clust, reg_control, type="text")
+
+stargazer(reg_iv, reg_control, type="text")
+```
+
+The result of the instrumental regression is a $\hat\beta_1$ of -2.36 and thereby associated with a substantially higher charcoal cost reduction than in the control variable model. The latter indicated a reduction of 1.88 USD per week in charcoal cost if all other characteristics stay constant.
+
+
+
+
+### Summary
+
+Introducing an IV regression with the randomly allocated purchase price as an instrument for `jikokoa` indicates that the omitted variable bias is even higher. Caused by underestimation, the bias amounts to approximately 2.36-1.88=0.48 USD and finally leads to a result of 2.36 USD of cost reduction per week.  
+ 
+Assuming this estimator to be consistent, investing in energy-efficient technologies seems to be indeed highly profitable for low-income households. Recall that the estimated $\hat\beta_0$ constitutes the average weekly charcoal cost for Jikokoa non-adopters and amounts to 5.71 USD per week. If we take the IV regression result of 2.36 USD cost reduction per week for Jikokoa adopters, this amounts to more than a 40 % cost reduction and leads to an internal rate of return (IRR) of 295 %. The IRR is the annualized return for an investment and is computed in the Jikokoa case for an investment period of two years (the warranty time). This annual return is extremely high, especially compared to other investment possibilities. Our regression results approximately coincide with the results of the descriptive analysis in `Chapter 3`. However, the initial descriptive result of 3 USD cost reduction through Jikokoa adoption is mitigated to 2.36 USD in the regression analysis.
+
+In addition to the analysis of the underlying paper, we will also conduct an IV regression with two instruments in the next exercise. Therefore, we will identify another random variable that is correlated with Jikokoa adoption. After evaluating the results of this model, we will apply some diagnostic tests for IV regressions to verify if our instruments are indeed exogenous variables and if `jikokoa` is endogenous.
+
+
+## Exercise 6 -- Additional analysis with two instruments ##
+
+In their paper, Berkouwer and Dean employed the random price as the sole instrument for the endogen variable, `jikokoa`. To enhance the validity of their findings, adding an additional instrumental variable to the analysis is an option. This will enable us to perform a Sargan test, which will investigate the exogeneity of our instruments.
+
+To this end, we will utilize another variable that meets the conditions of being random and has a statistically significant correlation with Jikokoa adoption. The possible candidate for this role has already been analyzed in Chapter 3 of the study.
+
+
+Quiz: Which variable besides the random price could be an appropriate instrument?
+
+[1]: The credit treatment dummy variable
+[2]: The attention treatment dummy variable
+[3]: The willingness to pay
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression IV 2")
+```
+
+In chapter 3, we already got a first impression of how strong the impact of credit financing on the willingness to pay is. Receiving credit for three months doubles WTP and thus influences the purchase chance substantially. Contrary, the attention treatment did not seem to change much regarding WTP impact. Both treatments used in the experiment are randomly assigned to the participants, which makes them exogen factors.
+
+To verify the relevance of the credit treatment as an instrumental variable, we can calculate its correlation with Jikokoa adoption. This will provide evidence of the statistical association between the treatment and Jikokoa adoption, which is a necessary condition for an instrumental variable to be considered relevant.
+
+
+Quiz: Consider the correlation between `jikokoa` and `treatc_pooled`, what do you expect?
+
+[1]: positive correlation
+[2]: negative correlation
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression IV 3")
+```
+
+**Task 6.1**  Load the data files `dat_reg.rds` and `dat_main.rds` with `readRDS()` and save it in `dat_reg` and `dat_main`. Just run and check the chunk.
+
+```{r "11_1"}
+dat_reg=readRDS("dat_reg.rds")
+dat_main=readRDS("dat_main.rds")
+```
+
+**Task 6.2** Use the command `cor()` to check the correlation between `jikokoa` and `treatc_pooled` of the data frame `dat_main`. To ignore NA-values put `use="complete.obs"` at the end of the formula as in *Task 4.3*.
+
+```{r "11_2"}
+# Enter your code here.
+```
+
+In contrast to `price_USD`, the correlation of `treatc_pooled` is positive. If individuals are in the credit treatment group, they will more likely acquire a Jikokoa.
+Consequently, we can assume that both conditions are fulfilled and use `treatc_pooled` as a second instrument in the IV regression. Because the second instrument is related to `treat_c`, which was used as a control variable in the model with one instrument, this control variable will be omitted in the following IV regression.
+
+For completeness, we can also compute the correlation between `jikokoa` and `treata_pooled`. The treatment variable exhibiting a higher correlation with `jikokoa` should be selected as the additional instrument to produce the most accurate estimation results.
+
+**Task 6.3** Run the code and determine which correlation is stronger based on the output.
+
+```{r "11_3"}
+cor(dat_main$jikokoa, dat_main$treata_pooled, use="complete.obs")
+```
+As the descriptive analysis indicates, attention treatment and Jikokoa adoption are rarely correlated. Therefore, we will use `treatc_pooled` as a second instrument in the IV regression.
+
+
+**Task 6.4** Conduct an instrumental regression with `felm()` as in Chapter 5 and use `treatc_pooled` as an additional instrument in this regression. Fill in the blanks. To evaluate whether the coefficient of `jikokoa` changes when two instrumental variables are used instead of one, conduct the regression again with one instrument and compare the results with `stargazer()`.
+
+```{r "11_4"}
+
+reg_iv_2=felm(amount_weekly_USD~ Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained + finwtp_USD + d_jikokoalast_years + v1_beliefs_annual_mean + v1_beliefs_annual_sd + treata + sms_amount_weekly_pre|0|______| respondent_id,  dat_reg)
+
+reg_iv=felm(amount_weekly_USD~ Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained + d_jikokoalast_years + v1_beliefs_annual_mean + v1_beliefs_annual_sd + finwtp_USD + treata + treatc + sms_amount_weekly_pre|0|(jikokoa~price_USD)|respondent_id,  dat_reg)
+
+stargazer(reg_iv_2, reg_iv, type="text")
+```
+
+From the output, we can deduce that the reduction in weekly coal consumption remains roughly the same when replacing the endogenous variable with both instruments. In the regression with `price_USD` and `treatc_pooled` as an instrument, the coal reduction amounts to 2.35 USD per week if a Jikokoa is adopted. 
+
+An advantage of using two instruments is that the **Sargan** test can be applied. This test is only applicable when there are more instruments used in the IV regression than endogenous regressors, as it is the case in our model. The Sargan test assesses whether the two instruments are indeed exogenous variables and is also referred to as the **test of overidentifying restrictions**. Our model consists of one endogenous explanatory variable, `jikokoa`, and two instruments, `price_USD` and `treatc_pooled`. Having two instruments for one endogenous variable result in an overidentified model, meaning that there are more instruments available to estimate the parameters than is actually necessary. Estimating the instrumental regression with one instrument would still be sufficient, however, the use of two instruments allows for the performance of the Sargan test.
+The null hypothesis of this test is that all instruments are exogenous. If the Sargan test is rejected, it suggests that at least one instrument is endogenous. The rejection criterion is the p-value. A low one indicates a rejection of the null hypothesis. If the test results in non-acceptance, the model may need to be reviewed. This could be due to misspecification, implying that at least one of the instruments is correlated with the error term or an omitted variable. The Sargan test can also fail to detect endogenous instruments, for instance if both instruments are actually not valid. Consequently, the acceptance of the null hypothesis is not a guarantee of the correctness of the model, it is merely a sufficient condition (Woolridge, J., 2012).
+
+
+In **R**, diagnostic tests for IV regression are easily applied with the `AER` package. With this package you can also perform IV regressions but without clustered standard errors. However, since we are only interested in the significance of the `jikokoa` variable and already know from the previous analysis that it is significant, we can return to a non-clustered regression. 
+The IV regression can be performed with the `ivreg()` function and the diagnostic test results are displayed with the `summary()` call. View the info box if you need more information about these two functions.
+
+```{r eval=FALSE}
+# Run for additional info in the Viewer pane
+info(" Usage of ivreg() and summary() of the package AER ")
+```
+
+**Task 6.5** Start by loading the `AER` package with the `library()`command. Then perform the IV regression with `ivreg()` and use `price_USD` as well as `treatc_pooled` as instruments. Finally, show the summary including the diagnostic tests with `summary()`. Most of the code is already given to you. Try to complete the missing code by yourself. 
+
+```{r "11_5"}
+library(AER)
+iv_reg=____(amount_weekly_USD~ jikokoa+finwtp_USD+Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained+d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd +treata+ sms_amount_weekly_pre| finwtp_USD+ Household_size + b_children + savings_KSH + b_incomeself_KSH + RiskAverse + CreditConstrained+d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd+treata+sms_amount_weekly_pre+ price_USD+treatc_pooled, data=dat_reg)
+summary(_____, diagnostics=TRUE)
+
+```
+
+
+Quiz: Does the result of the Sargan test imply that our instruments are exogenous?
+
+[1]: yes
+[2]: no
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Sargan")
+```
+
+The p-value of our test statistic is below 5 %, suggesting that at least one of our two instruments is endogenous. Unfortunately, the Sargan test does not provide any information about which of the instruments is the invalid one. (Gujaranti, 2003).
+
+Because we have several control variables that are included in the instrumental regression, the correlation with the error term can also derive from the endogeneity of one or more control variables.
+
+If we conduct the instrumental regression without control variables, we get the following results:
+
+**Task 6.6** Just run this IV regression without the control variables.
+
+```{r "11_6"}
+
+iv_reg3=ivreg(amount_weekly_USD~ jikokoa| price_USD+treatc_pooled, data=dat_reg)
+summary(iv_reg3, diagnostics=TRUE)
+```
+
+Without the control variables, the Sargan test is on the verge of passing, and hence we cannot assume with certainty that the instrumental regression is unbiased.  Nevertheless, the random distribution of prices and credit treatments strongly suggests that these factors do not correlate with the error term and are exogenous impacts.
+
+Let us shortly discuss the other two diagnostic tests. The hypothesis that we suffer from weak instruments can be rejected, which means we have an adequate correlation of our `jikokoa` variable and the two instruments. If the correlation between instruments and endogenous regressor is weak, the IV estimator can be inconsistent and biased. (Verbeek, 2008). The Wu-Hausman test indicates whether the original explanatory variable is indeed endogenous, but the instruments have to be valid to get a correct test result. If a low p-value is observed, the null hypothesis that all explanatory variables in the regression are exogenous can be rejected. In the IV regression performed in *Task 6.5*, the p-value for the WU-Hausman test is below 1 %. We can reject the null hypothesis if we assume that our instruments are valid, suggesting that `jikokoa` is indeed endogenous. As a result, performing an IV regression is indeed necessary to solve the endogeneity issue. 
+
+In the next Chapter, we will analyze the relationship between WTP and the four different treatment groups to learn about possible strategies for enhancing energy-efficient technology adoption.
+
+## Exercise 7 -- Impact of credit and attention treatments on WTP 
+
+
+Now that we have established that owning a Jikokoa leads to considerable cost savings, it is also interesting to see how the low willingness to pay can be raised. Potential savings through efficient technologies could improve poverty in societies. 
+By working together with communities, the private sector, and other stakeholders, governments play an essential role in improving willingness to pay and making efficient technologies like the Jikokoa stove more accessible to lower-income populations.
+But how can the willingness to pay be improved in low-income social populations, and what can governments contribute to this?
+
+In Chapter 3, it was established that the availability of financing options has a positive impact on willingness to pay (WTP). The attention treatment, however, did not seem to cause an improvement in Jikokoa adoption. To further examine the relationship between financing options and educational efforts on WTP, regression analyses can be performed.
+
+The interest rates used in the experiment, are 1.16 % per month or 14 % per year and represent the capped interest rates by the Central Bank of Kenya in 2018. These rates do not accurately reflect the rates that would normally be charged in the market. The capped interest rates were intended to provide relatively low-cost financing options to the population, however, this has had the unintended consequence of limiting the lending business of banks, as the associated risk cannot be covered by the capped interest rate. As a result, many individuals, particularly those from low-income households, are unable to access credit from banks (Alper et.al., 2019).
+
+Mobile lenders have filled this gap by offering credit, however, the interest rates charged by these lenders, which can reach up to 7.5 % per month, are significantly higher than those used in the experiment. Furthermore, the amount of the loan is restricted, with the median amount available for short-term borrowing being 10 USD, making it difficult for many respondents to borrow the full cost of the stove. These factors highlight the need for more comprehensive and accessible financing options for low-income populations, as well as the importance of considering the potential consequences of interest rate caps and other policy interventions in this area (Berkouwer & Dean, 2022).
+
+**Task 7.1**  Just press `edit`and `check` to load our main data set `dat_main`. 
+
+```{r "12_1"}
+dat_main=readRDS("dat_main.rds")
+```
+
+We will start with the credit treatment analysis. For further examination, we will conduct an OLS regression with control variables, as outlined in Chapter 4. Since the treatments were randomly assigned to the respondents, the respective treatment variable is considered exogenous, making an instrumental regression unnecessary. However, we will control for the respondents' characteristics as before. 
+The regression equation for estimating the effect of credit is the following:
+$$
+WTP _{i} = ß _{0} + ß_1credit_i  + controls_i+ \varepsilon_{i}
+$$
+
+Quiz: What measures $\beta_1$?
+
+[1]: The change in WTP in USD provoked through credit treatment, assuming constant control variables
+[2]: The average WTP in USD for respondents with credit treatment
+[3]: The average WTP in USD for respondents without credit treatment
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression credit treatment")
+```
+
+
+
+Later, we will also run a regression with the two individual credit groups (C1, C2). 
+But first, we aim to investigate the average WTP in the control group to compare the change displayed by $\hat\beta_1$.
+
+
+**Task 7.2** Run the following code line to get the average WTP in USD without any treatment. In Task 3.9 you already solved this.
+```{r "12_2"}
+dat_control=filter(dat_main, treata_pooled==0 & treatc_pooled==0) %>%
+  summarise(mean(finwtp_USD, na.rm=TRUE))
+dat_control
+```
+
+**Task 7.3** Conduct an OLS regression with `lm()` and use `finwtp_USD` as dependent variable and `treatc_pooled` as explanatory variable. Include the respondents' characteristics as control variables. The corresponding data set is `dat_main`. Afterwards, show a summary of the regression results and have a look at the output. The code is already given to you, just press `edit` and `check`.
+(I changed the control variable `savings_KSH` to `savings_USD` due to a more clearly output.)
+
+```{r "12_3"}
+reg_credit1=lm(finwtp_USD~treatc_pooled+Household_size + b_children + savings_USD+ b_incomeself_KSH +d_charcoalbuy_KSH+ RiskAverse + CreditConstrained+ d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd, dat_main)
+summary(reg_credit1)
+```
+
+Consistent with our computations in Chapter 3, the WTP more than doubles if respondents are able to finance their purchase with cheap credit. The WTP increased significantly by 12.5 USD to almost 25 USD.
+Note that we do not need clustered standard errors because in the treatment regression the computations are based on the data frame `dat_main`. In this table, every respondent appears just once. 
+Let us analyze if there is a difference between the two credit treatments (C1, C2) which are different in their repayment structure. In group C1, payment is due at 12 weekly deadlines, whereas in group C2 payment is due at three monthly deadlines.
+
+
+
+**Task 7.4** Fill in the missing parts of the code to run the regression from above for the two credit treatments `c1`and `c2`. Then compare the two regressions.
+
+```{r "12_4"}
+reg_credit2=lm(______ ~ c1+c2+Household_size + b_children + savings_USD+ b_incomeself_KSH +d_charcoalbuy_KSH+ RiskAverse + CreditConstrained+d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd, dat_main)
+
+_______(reg_credit1, reg_credit2, type="text", omit = c("Household_size", "b_children", "savings_USD", "b_incomeself_KSH", "d_charcoalbuy_KSH", "RiskAverse", "CreditConstrained", "d_jikokoalast_years", "v1_beliefs_annual_mean", "v1_beliefs_annual_sd", "Constant"))
+```
+
+
+Quiz: Does the credit treatment C1 or C2 generate a higher WTP?
+
+[1]: C1
+[2]: C2
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("Regression credit treatment 2")
+```
+
+The results of the credit treatment analysis reveal that the more frequent repayment schedule of C1 treatment leads to a slight increase in WTP. On average, members of the weekly deadline group (C1) are willing to pay approximately 1.5 USD more for an energy-efficient stove than members of the monthly deadline group (C2). This phenomenon is consistent with the *concentration bias* theory, which suggests that decision makers tend to overweight large, infrequent amounts relative to small, frequent amounts (Kőszegi & Szeidl, 2013).
+
+After these encouraging results, it would be valuable to examine the fraction of respondents in the credit treatment group who are willing to pay the market price of 40 USD, as well as those willing to pay 30 USD. We can be compare this information  with the corresponding fractions in the non-treatment sample to assess the impact of credit availability on willingness to pay.
+
+
+**Task 7.5** We can count the respondents with and without credit treatment with the `dplyr` command `count()`. Then we should get rid of the `NA`-values by using `filter()`. Save this number per treatment in a new data frame named `total`. Afterwards, filter `dat_main` for WTP above or equal to 40 USD and count these cases again with `count()`. Finally, we have to add a new column with `mutate()`.This column states the number of cases with WTP above 40 USD divided through the respective total respondent number per group. Fill in the blanks. 
+
+```{r "12_5"}
+total=filter(count(dat_main, treatc_pooled),!is.na(treatc_pooled)))
+
+dat_main%>%
+  filter(finwtp_USD >=__)%>%
+  count(_____)%>%
+  mutate(fraction=n/total$n)
+
+```
+
+The percentage of those willing to buy a Jikokoa at the market price is still low at 6.9%. However, compared to the group without a loan, the increase is considerable. Additionally we can run the code again to see the percentage that would purchase the stove for 30 USD.
+
+**Task 7.6** Click on `edit` and `check` to get the respective fraction that purchases the Jikokoa for 30 USD.
+
+```{r "12_6"}
+
+dat_main%>%
+  filter(finwtp_USD >=30)%>%
+  count(treatc_pooled)%>%
+  mutate(fraction=n/total$n)
+```
+
+As we can derive from the output, 34.4 % of the respondents that benefit from the credit treatment are willing to acquire the Jikokoa for 30 USD. 
+
+Next, we also want to investigate the attention approach, where the focus is on clarifying costs and benefits. We will start directly with the regression including the two different attention groups. As I already stated in the procedure of the experiment, groups A1 and A2 did the charcoal SMS study already before visit 2 to draw attention to coal costs. Before the BDM elicitation, the respondents in this treatment group completed an attention sheet. There they computed weekly, monthly, and yearly savings using the efficient stove based on their weekly expense and assumed 50 % savings with the new stove. During the questions about their WTP, the corresponding savings are displayed to them. In group A2, consideration is given to the net benefit generated from adoption by taking into account both the benefits and the costs of adoption incurred over time. The cost structure of adoption is determined by the credit treatment assigned to each individual.
+
+**Task 7.7** Fill in the missing parts of the code to run the regression again for the two attention treatments, `a1` and `a2`. After that show the two estimated coefficients of this regression with `stargazer()`. 
+```{r "12_7"}
+reg_att=lm(finwtp_USD ~ ______+Household_size + b_children + savings_USD+ b_incomeself_KSH +d_charcoalbuy_KSH+ RiskAverse + CreditConstrained+d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd , dat_main)
+
+_______(reg_att, type="text",omit = c("Household_size", "b_children","savings_USD", "b_incomeself_KSH", "d_charcoalbuy_KSH", "RiskAverse", "CreditConstrained","d_jikokoalast_years", "v1_beliefs_annual_mean", "v1_beliefs_annual_sd", "Constant"))
+
+```
+
+By analyzing this output, we can conclude that the relationship between willingness to pay and attention treatment is only a slightly one and additionally insignificant. Consequently, it is not very expedient to invest a lot of effort in the education of low-income people in terms of cost and savings. It does not lead to a significant difference whether you specifically highlight savings or give them a regular promotional flyer. Even if most of the respondents may have low education, the majority seem to be aware of the benefits and costs a Jikokoa adoption implies. 
+
+Last but not least, let us investigate if the impact of credit is mitigated by attention to future loan payments. To analyze the relationship between explanatory variables, we have to add an interaction term between them.
+
+
+Quiz: Which interaction term must we add to analyze the relationship between credit and attention to loan payments?
+
+[1]: Credit (pooled) and A1
+[2]: Credit (pooled) and A2
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("interaction term")
+```
+
+Future loan payments are costs which are only involved in group A2. The regression equation with interaction effects is built as follows:
+$$
+WTP _{i} = \beta_0 + \beta_1credit_i  +\beta_2a2_i+ \beta_3credit_i*a2_i+ controls_i+ \varepsilon_{i}
+$$
+Note that adding an interaction term to a model changes the interpretation of all the coefficients.
+Without an interaction term, we interpret $\beta_1$ as the unique effect of credit on WTP. But the interaction means that the effect of credit on WTP differs for different values of a2.  Hence the unique effect of credit on WTP is not limited to $\beta_1$. It also depends on the values of $\beta_3$ and a2.
+
+**Task 7.8** Press `edit` and `check` to run a regression with an interaction term between credit and attention to costs. Save it to the variable `reg_att_cre`. Then show the estimated coefficients of this regression with `stargazer()`. Try to figure out the interpretation of the different coefficients of the output.
+
+```{r "12_8"}
+reg_att_cre=lm(finwtp_USD ~ treatc_pooled+a2+treatc_pooled*a2+Household_size + b_children + savings_USD+ b_incomeself_KSH +d_charcoalbuy_KSH+ RiskAverse + CreditConstrained +d_jikokoalast_years+ v1_beliefs_annual_mean+ v1_beliefs_annual_sd, dat_main)
+stargazer(reg_att_cre, type="text",omit = c("Household_size", "b_children","savings_USD", "b_incomeself_KSH", "d_charcoalbuy_KSH", "RiskAverse", "CreditConstrained","d_jikokoalast_years", "v1_beliefs_annual_mean", "v1_beliefs_annual_sd", "Constant"))
+```
+
+
+Quiz: What is the change in WTP if a respondent is in a credit and a2 treatment group?
+
+[1]: 13.58
+[2]: 1.77
+[3]: 11.05
+
+```{r eval=FALSE}
+# Run line to answer the quiz above
+answer.quiz("interaction term 2")
+```
+
+From the values of the coefficients, we can conclude that credit treatments without drawing attention to future costs increase the WTP by 13.58 USD, which is more than if respondents are in both groups. For the latter, the change in WTP is only 11.05 USD. 
+Thus, attention to future loan payments reduces the impact of credit on WTP by 2.52 USD.
+
+Inattention to future loan costs is also reflected in the relatively large rate of Jikokoas that are returned during the experiment. If someone is not able to pay back the debt the stove has to be given back as only penalty. The repayment rate of the loan debt is 72 % which is consistent with the data of microlending agencies. 
+
+### Summary ###
+
+By conducting different treatment regressions, we wanted to investigate how people of lower classes can be persuaded to raise their willingness to pay for efficient technologies. Enabling these individuals access to credit seems to be a promising possibility. A three-month loan doubles the WTP to approximately 25 USD. However, the market price of 40 USD is still not reached, and even with credit, only 6.9 % would pay the 40 USD. At least assuming a price of 30 USD, the fraction would rise to 34.4 %.
+
+Getting the respondents to pay attention to benefits and costs in more detail than a simple 50 % savings advertisement of the producer does not change their WTP significantly. Subjects seem to be aware of the savings potential but do not have enough cash reserves or need these reserves for other issues.
+
+In conclusion, the expansion of financing options is the way to increase the willingness to buy and thus enable a higher standard of living and CO2 savings.
+In practice, it is not always possible to get a loan and when it is, it comes at a high cost in terms of interest rates and limited amounts of money. Taking the repayment rate of the experiment of 72 %, lenders would have to charge interest of 1/0.72, which amounts to 39 % over the three-month period, to cover their losses due to defaults. 
+The high default rates are mainly due to the present bias of respondents. Educating respondents about credit costs in the future mitigates the increase in the WTP due to credit treatment. Further, people in low-income classes do not have enough savings to cope with unforeseen events. 
+Solutions to this matter include microfinance programs, subsidies, or innovative financing mechanisms that allow for more flexible payment terms. Governments could play a crucial role in supporting these initiatives.
+In the final chapter, I will point out some solution approaches to the credit and price issue.
+
+
+
+## Exercise 8 -- Conclusion 
+
+The experiment with the energy-efficient stove "Jikokoa" in Kenya conducted by Berkouwer and Dean, gives some interesting insights into why adopting climate friendly technologies stays low and what can be done to increase buying intention. These observations are essential for two challenges of the 21st century: climate change and poverty. Energy-efficient technology adoption can be a unique opportunity to reduce greenhouse gas emissions at negative cost by saving energy expenses. 
+
+Before discussing possible strategies to promote the dissemination of such technologies, I would like to reiterate our analysis results briefly.
+
+Firstly, we investigated whether you can indeed save energy costs with the energy-efficient cooker. The results are remarkable. More than 100 dollars a year can be saved on charcoal costs, equivalent to a charcoal expense reduction of at least 35 %. This sum amounts to a whole month's salary for an average participant. But besides private cost advantages, the stove generates significant carbon emissions reductions of 147 USD per year. Energy-efficient technology adoption is, therefore, in the interest of the whole population and the respective government. When you compare the savings with the purchase cost of this cooker of 40 dollars, it is definitely worth buying. Besides these monetary advantages, Berkouwer and Dean also detected significant time-saving in cooking time and higher household health due to less coal pollution in the cabin.
+However, the little savings of the low-income classes often make such an investment impossible for them. If they have enough savings, they usually need them as a backup for other sudden needs. 
+
+Since the advertised advantages of the Jikokoa are actually given, we have examined why the distribution is so low and how interest in this product can be increased.
+The average WTP for this cooker is below 12 dollars, which is not even a third of the actual purchase price. The respective respondent's WTP was determined using the BDM method. In order to find strategies to improve the sales of the cooker among the underclass, the researchers examined two treatments in their experiment. We examined both for a connection with WTP and concluded that financing options significantly increase WTP and, thus, the share of purchases. The attention treatment, on the other hand, did not lead to any changes concerning stove adoption. The barrier that prevents households from making energy efficiency improvements seems to have an economic background rather than an informational one. Even if people in low-income classes suffer from low education levels, they seem to be aware of the economic advantages an energy-efficient stove generates. 
+By conducting OLS and additional instrumental variable regressions due to an endogeneity problem, we verified and expanded the results we got in our descriptive analysis. You learned about the different regression types and why we use them in our context. 
+
+
+The result of Berkouwer's and Dean's experiment is, apart from the benefit of the Jikokoa, primarily that the expansion of lending represents a possible solution to the problem of low adoption of energy-efficient technologies. In practice, however, this is challenging to implement, as the high default rates lead to remarkably high-interest rates. Theoretically, the manufacturer of the cooker could also offer a financing option for their product. Nevertheless, for the manufacturer, this is rather unattractive. Risks are high, and energy technology companies are not specialized in this area.
+
+The outcomes of this study are in particular interesting for policymakers. The stove mitigates the poverty of low-income households and enables using the savings for critical household expenditures such as food items and school fees. Furthermore, it generates significant carbon emission reductions of 147 USD per year, increasing the overall welfare of society. Because private households face substantial barriers investing in energy-efficient technologies, policymakers must actively issue supportive policies. For instance, stove subsidies are an efficient means of improving welfare. By lowering the adoption cost, a subsidy effectively targets credit-constrained agents. The demand curve among the control group indicates that, for example, a 10 USD subsidy would increase adoption from less than 0.6 % to 6 % percent. A subsidy of 30 USD would even expand adoption to 54.5 %. Considering the possible private and public savings in the form of less poverty and preventing environmental damages, a subsidy for the Jikokoa would generate 19 USD of welfare gains for every 1 USD subsidy (Berkouwer & Dean, 2022).
+
+
+The discoveries of this study are not only useful for political institutions in Kenya or the African region. Low-income earners represent a significant share of society in every country and must be included in the energy-efficient transition. Otherwise, the problem of low-income individuals investing too little in energy-efficient technologies jeopardizes plans to slow down climate change as much as possible.
+Pattanayak et al. (2019) experimented with improved cookstoves in the Indian Himalayas. They also found that the adoption of electric and biomass stoves remains low despite their health and environmental benefits. Their intervention bundle combined a mix of subsidies paired with finance, retail, and marketing. It was very effective in promoting stove adoption.  
+
+The discussion in the EU and USA is mainly about replacing heating systems or refurbishing buildings for energy-efficient purposes (Ugarte et al., 2016).
+In Mexico, in 2009 was a large "cash for coolers" program introduced. Old refrigerators and air conditioners are replaced by new ones to save electricity. The program provided direct payment and subsidized financing in the form of a one-time credit that had to be paid back in the electricity bill with a preferential interest rate over a 4-year period. In an ex-post study, the impact of the replacement program was evaluated, and the researcher found that the energy consumption in the case of refrigerators declined by 8 %, only a quarter of the anticipated reduction. The air conditioning replacement was expected to save even more energy costs than the refrigerators. However, in the end, energy usage and hence costs due to air conditioning have even increased through the program (Davis et al., 2012). This study shows that allocating funds for energy-related programs has to be considered carefully. Otherwise, programs can get very costly if generating beneficial results is not achieved.
+However, granting subsidized credit presents a reasonable alternative to direct payments and could also be a solution in the Jikokoa case, where access to credit is the primary driver of adoption. 
+
+
+
+
+## Exercise 9 -- References ##
+
+### Bibliography
+
+Alper, M. E., Clements, M. B. J., Hobdari, M. N. A., & Porcel, R. M. (2019). Do interest rate controls work? Evidence from Kenya. IMF Working Paper.
+
+Becker, G. M., DeGroot, M. H., & Marschak, J. (1964). Measuring utility by a single‐response sequential method. Behavioral science, 9(3), 226-232.
+
+Berkouwer, S. B., & Dean, J. T. (2022). Credit, attention, and externalities in the adoption of energy efficient technologies by low-income households. American Economic Review, 112(10), 3291-3330.
+
+Cameron, A. C., & Miller, D. L. (2015). A practitioner’s guide to cluster-robust inference. Journal of human resources, 50(2), 317-372.
+
+Davis, L. W., Fuchs, A., & Gertler, P. (2014). Cash for coolers: evaluating a large-scale appliance replacement program in Mexico. American Economic Journal: Economic Policy, 6(4), 207-38.
+
+Drehobl, A., & Ross, L. (2016). Lifting the high energy burden in America’s largest cities: How energy efficiency can improve low income and underserved communities.
+
+Greene, W.H. (2020). Econometric Analysis. 8th Edition, Pearson Prentice Hall, Upper Saddle River.
+
+Gujarati, D. N. (2003). Basic Econometrics. 4th Edition McGraw-Hill. New York.
+
+International Energy Agency (IEA). (2018). Market Report Series: Energy Efficiency 2018.
+
+Kennedy, P. (2008). A guide to econometrics. John Wiley & Sons.
+
+Kőszegi, B., & Szeidl, A. (2013). A model of focusing in economic choice. The Quarterly journal of economics, 128(1), 53-104.
+
+Lang, H. (2016). Elements of regression analysis. Stockholm: KTH Mathematics.
+
+Lewis, J. J., & Pattanayak, S. K. (2012). Who adopts improved fuels and cookstoves? A systematic review. Environmental health perspectives, 120(5), 637-645.
+
+Pattanayak, S. K., Jeuland, M., Lewis, J. J., Usmani, F., Brooks, N., Bhojvaid, V., ... & Ramanathan, V. (2019). Experimental evidence on promotion of electric and improved biomass cookstoves. Proceedings of the national Academy of Sciences, 116(27), 13282-13287.
+
+Ugarte, S., van der Ree, B., Voogt, M., Eichhammer, W., Ordoñez, J. A., Reuter, M., ... & Villafafila Robles, R. (2016). Energy efficiency for low-income households.
+
+Urmee, T., & Gyamfi, S. (2014). A review of improved Cookstove technologies and programs. Renewable and Sustainable Energy Reviews, 33, 625-635.
+
+US Environmental Protection Agency (US EPA). (2016). Technical Update of the Social Cost of Carbon for Regulatory Impact Analysis Under Executive Order 12866. Washington, DC: US Environmental Protection Agency.
+
+Venkataraman, C., Sagar, A. D., Habib, G., Lam, N., & Smith, K. R. (2010). The Indian national initiative for advanced biomass cookstoves: the benefits of clean combustion. Energy for sustainable development, 14(2), 63-72.
+
+Verbeek, M. (2008). A guide to modern econometrics. John Wiley & Sons.
+
+Weeraratne, N. C. (2016). A Comparative Analysis of the Effectiveness of Ceteris Paribus Assumption in Economic Models.
+
+Westhoff, F. (2013). An introduction to econometrics: A self-contained approach. MIT Press Books, 1.
+
+Worldbank. (2018). Kenya Economic Update. Edition No. 17.
+
+Yakaboski, T., & Nolan, K. (2011). The Kenyan School Systems' Impact on Public Higher Education Access: Examination of Growth, Access, and Challenges. Journal of International Education and Leadership, 1(1), n1.
+
+### R packages
+
+Arnold J. (2021). ggthemes: Extra Themes, Scales and Geoms for 'ggplot2'. R package version 4.2.4, https://CRAN.R-project.org/package=ggthemes.
+
+Gaure, S. (2022). lfe: Linear group fixed effects. R package version 2.8-8.
+  
+Hlavac, M. (2022). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.3. https://CRAN.R-project.org/package=stargazer
+  
+Kleiber C. & Zeileis A. (2008). Applied Econometrics with R. Springer-Verlag, New York. https://CRAN.R-project.org/package=AER.
+
+Kranz, S. (2020). RTutor: Interactive R problem sets with automatic testing of solutions and automatic hints. R package version 2020.11.25.
+  
+Pedersen, T. (2022). patchwork: The Composer of Plots_. R package version 1.1.2,
+https://CRAN.R-project.org/package=patchwork.
+  
+Waring E., Quinn M., McNamara A., Arino de la Rubia E., Zhu H. & Ellis S. (2022).
+skimr: Compact and Flexible Summaries of Data_. R package version 2.1.4,
+https://CRAN.R-project.org/package=skimr.
+  
+Wickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York. https://ggplot2.tidyverse.org.
+  
+Wickham H., Miller E. & Smith D. (2023). haven: Import and Export 'SPSS', 'Stata' and 'SAS' Files. https://haven.tidyverse.org.
+
+Wickham H., François R., Henry L., Müller K. & Vaughan D. (2023). dplyr: A Grammar of Data Manipulation. https://dplyr.tidyverse.org.
+
+Xu S., Chen M., Feng T., Zhan L., Zhou L. & Yu G. (2021). Use ggbreak to effectively utilize plotting space to deal with large datasets and outliers. Frontiers in Genetics.
+
+
